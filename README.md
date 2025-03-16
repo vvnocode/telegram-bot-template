@@ -1,5 +1,43 @@
 # telegram-bot-template
-A Telegram Bot template. 一个Telegram机器人模板。
+A Telegram Bot template. 一个Telegram机器人模板。集成actions自动构建，一键安装脚本。
+
+## 使用
+
+### 使用install.sh安装(推荐)
+
+1. 运行一键安装脚本
+```bash
+bash <(curl -L -s https://raw.githubusercontent.com/vvnocode/telegram-bot-template/main/install.sh)
+```
+2. 根据提示输入Telegram Bot Token和Chat ID
+
+### 手动修改配置文件
+
+安装完成后可以手动修改配置文件，修改完成后需要重启服务：`systemctl restart telegram-bot-template`
+
+配置文件位于 `/etc/telegram-bot-template/config.yaml`，示例：
+```yaml
+# Telegram配置
+telegram_bot_token: ""  # 你的Telegram Bot Token
+telegram_chat_id: ""    # 授权的Telegram用户ID, 多个用户ID用逗号分隔
+```
+
+### Telegram Bot 命令
+
+- `/start` - 显示帮助信息
+
+### 服务管理
+
+```bash
+# 启动服务
+systemctl start telegram-bot-template
+# 停止服务
+systemctl stop telegram-bot-template
+# 重启服务
+systemctl restart telegram-bot-template
+# 查看服务状态
+systemctl status telegram-bot-template
+```
 
 ## 开发
 
