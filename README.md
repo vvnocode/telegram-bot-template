@@ -62,15 +62,17 @@ pip install -r requirements.txt
 
 4. 本地开发运行:
 ```shell
-python src/bot.py
+python src/main.py
 ```
 
 ## 自动构建
 
-支持打tag后，使用actions自动构建。
-需要配置项目secrets
-路径：Project - Settins -> Security -> Secrets and variables -> Repository secrets
-参数：MY_GITHUB_TOKEN
+1. 支持打tag后，使用actions自动构建。
+2. 未使用全局Token，需要自己创建 [tokens](https://github.com/settings/tokens)。
+3. 需要配置MY_GITHUB_TOKEN
+    路径：Project - Settins -> Security -> Secrets and variables -> Repository secrets
+    参数：MY_GITHUB_TOKEN
+    值为步骤2的token
 
 ## 常见问题
 
