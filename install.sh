@@ -85,7 +85,7 @@ install() {
     # 创建systemd服务
     cat > /etc/systemd/system/telegram-bot-template.service << EOF
 [Unit]
-Description=VPS IP Change Bot
+Description=Telegram Bot Template
 After=network.target
 
 [Service]
