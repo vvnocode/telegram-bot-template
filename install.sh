@@ -106,11 +106,11 @@ EOF
     read -p "是否现在配置Bot? (y/N): " configure_now
     if [[ "$configure_now" =~ ^[Yy]$ ]]; then
         read -p "请输入Telegram Bot Token: " bot_token
-        read -p "请输入Telegram Chat ID, 多个用户ID用逗号分隔: " chat_id
+        read -p "请输入Telegram Admin Chat ID（管理员ID）, 多个用户ID用逗号分隔: " chat_id
         
         # 更新配置文件
         sed -i "s|^telegram_bot_token:.*|telegram_bot_token: \"$bot_token\"|" "$INSTALL_DIR/config.yaml"
-        sed -i "s|^telegram_user_id:.*|telegram_user_id: \"$chat_id\"|" "$INSTALL_DIR/config.yaml"
+        sed -i "s|^telegram_admin_id:.*|telegram_admin_id: \"$chat_id\"|" "$INSTALL_DIR/config.yaml"
     fi
     
     # 启动服务
