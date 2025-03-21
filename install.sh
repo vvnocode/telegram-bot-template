@@ -110,7 +110,7 @@ EOF
         
         # 更新配置文件
         sed -i "s|^telegram_bot_token:.*|telegram_bot_token: \"$bot_token\"|" "$INSTALL_DIR/config.yaml"
-        sed -i "s|^telegram_chat_id:.*|telegram_chat_id: \"$chat_id\"|" "$INSTALL_DIR/config.yaml"
+        sed -i "s|^telegram_user_id:.*|telegram_user_id: \"$chat_id\"|" "$INSTALL_DIR/config.yaml"
     fi
     
     # 启动服务
