@@ -1,18 +1,20 @@
 from telegram import Update
-from telegram.ext import ContextTypes, CommandHandler
-import time
+from telegram.ext import ContextTypes
+
 import os
-from datetime import datetime
+import platform
+import time
+import psutil
 
-from src.auth import UserManager
+from src.auth import UserManager, UserRole
 from src.logger import logger
-from src.utils import get_system_info, format_time_delta
+from src.bot.handlers.command import CommandPlugin, CommandCategory, CommandRegistry
 
-# 记录机器人启动时间
-BOT_START_TIME = time.time()
+# 启动时间
+START_TIME = time.time()
 
 async def status_command(update: Update, context: ContextTypes.DEFAULT_TYPE, user_manager: UserManager):
-    """处理/status命令，查看机器人状态
+    """处理/status命令，显示机器人状态，仅管理员可用
     
     Args:
         update: Telegram更新对象
@@ -23,35 +25,63 @@ async def status_command(update: Update, context: ContextTypes.DEFAULT_TYPE, use
     if not await user_manager.check_admin_permission(update):
         return
     
-    # 获取系统信息
-    system_info = get_system_info()
+    # 获取管理员信息
+    admin_id = update.effective_user.id
+    admin_name = update.effective_user.username
+    
+    logger.info(f"管理员 {admin_id} ({admin_name}) 查看了系统状态")
     
     # 计算运行时间
-    uptime_seconds = time.time() - BOT_START_TIME
-    uptime_str = format_time_delta(int(uptime_seconds))
+    uptime_seconds = int(time.time() - START_TIME)
+    days, remainder = divmod(uptime_seconds, 86400)
+    hours, remainder = divmod(remainder, 3600)
+    minutes, seconds = divmod(remainder, 60)
     
-    # 构造状态消息
-    status_message = (
-        f"🤖 机器人状态报告\n\n"
-        f"📊 系统信息:\n"
-        f"➢ 平台: {system_info['platform']}\n"
-        f"➢ Python: {system_info['python_version']}\n"
-        f"➢ 主机名: {system_info['hostname']}\n"
-        f"➢ CPU使用率: {system_info['cpu_usage']}%\n"
-        f"➢ 内存使用率: {system_info['memory_usage']}%\n"
-        f"➢ 磁盘使用率: {system_info['disk_usage']}%\n\n"
-        f"⏱ 运行时间: {uptime_str}\n"
-        f"🕒 当前时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
-    )
+    uptime_str = ""
+    if days > 0:
+        uptime_str += f"{days}天 "
+    if hours > 0 or days > 0:
+        uptime_str += f"{hours}小时 "
+    if minutes > 0 or hours > 0 or days > 0:
+        uptime_str += f"{minutes}分钟 "
+    uptime_str += f"{seconds}秒"
     
-    logger.info(f"用户 {update.effective_user.id} 请求了状态信息")
-    await update.message.reply_text(status_message)
+    # 获取系统信息
+    cpu_percent = psutil.cpu_percent()
+    mem = psutil.virtual_memory()
+    disk = psutil.disk_usage('/')
+    
+    # 构建状态消息
+    status_message = "🖥️ *系统状态*\n\n"
+    
+    # 机器人信息
+    status_message += "*🤖 机器人信息:*\n"
+    status_message += f"⏱️ 运行时间: {uptime_str}\n"
+    status_message += f"👥 已授权用户: {len(user_manager.allowed_user_ids)}\n"
+    status_message += f"👑 管理员: {len(user_manager.admin_ids)}\n\n"
+    
+    # 系统信息
+    status_message += "*💻 系统信息:*\n"
+    status_message += f"🐧 系统: {platform.system()} {platform.release()}\n"
+    status_message += f"🔄 CPU使用率: {cpu_percent}%\n"
+    status_message += f"💾 内存: {mem.percent}% ({round(mem.used/1024/1024/1024, 1)}/{round(mem.total/1024/1024/1024, 1)} GB)\n"
+    status_message += f"💿 硬盘: {disk.percent}% ({round(disk.used/1024/1024/1024, 1)}/{round(disk.total/1024/1024/1024, 1)} GB)\n"
+    
+    # 发送状态消息
+    await update.message.reply_text(status_message, parse_mode='Markdown')
 
-def register_status_handler(application, user_manager: UserManager):
-    """注册status命令处理器"""
-    application.add_handler(
-        CommandHandler(
-            "status", 
-            lambda update, context: status_command(update, context, user_manager)
+def register_status_command(command_registry: CommandRegistry):
+    """注册status命令
+    
+    Args:
+        command_registry: 命令注册器实例
+    """
+    command_registry.register_command(
+        CommandPlugin(
+            command="status",
+            description="查看系统状态",
+            handler=status_command,
+            category=CommandCategory.SYSTEM,
+            required_role=UserRole.ADMIN
         )
     ) 
