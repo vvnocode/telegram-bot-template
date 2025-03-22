@@ -1,0 +1,65 @@
+# 命令配置示例
+# 此配置文件用于覆盖代码中定义的命令属性
+commands:
+  # 主菜单命令
+  start:
+    description: "启动机器人并显示功能菜单"
+    category: MAIN
+    required_role: USER
+    is_visible: true
+  
+  help:
+    description: "显示帮助信息和可用命令"
+    category: MAIN
+    required_role: USER
+    is_visible: true
+    
+  admin:
+    description: "访问管理员控制面板"
+    category: MAIN
+    required_role: ADMIN
+    is_visible: true
+  
+  menu:
+    description: "查看所有可用命令及权限"
+    category: MAIN
+    required_role: USER
+    is_visible: true
+  
+  # 系统管理命令
+  status:
+    description: "查看系统运行状态"
+    category: SYSTEM
+    required_role: ADMIN
+    is_visible: true
+    
+  # 用户管理命令
+  users:
+    description: "查看所有用户列表"
+    category: USER
+    required_role: ADMIN
+    is_visible: true
+    
+  adduser:
+    description: "添加普通用户"
+    category: USER
+    required_role: ADMIN
+    is_visible: true
+    
+  deluser:
+    description: "删除普通用户"
+    category: USER
+    required_role: ADMIN
+    is_visible: true
+    
+  addadmin:
+    description: "添加管理员"
+    category: USER
+    required_role: ADMIN
+    is_visible: true
+    
+  deladmin:
+    description: "将管理员降级为普通用户"
+    category: USER
+    required_role: ADMIN
+    is_visible: true 

@@ -174,4 +174,5 @@ cython_debug/
 .pypirc
 
 # project
-config.yaml
+config/config.yaml
+config/commands.yaml

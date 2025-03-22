@@ -9,7 +9,7 @@ NC='\033[0m'
 INSTALL_DIR="/etc/telegram-bot-template"
 REPO_URL="https://github.com/vvnocode/telegram-bot-template"
 BINARY_URL="$REPO_URL/releases/latest/download/telegram-bot-template"
-CONFIG_URL="$REPO_URL/raw/main/config.yaml.example"
+CONFIG_URL="$REPO_URL/raw/main/config/config.yaml.example"
 
 # 卸载函数
 uninstall() {
