@@ -35,38 +35,6 @@ class UserManager:
         elif user_id_str in self.allowed_user_ids:
             return UserRole.USER
         return None
-    
-    async def check_user_permission(self, update: Update) -> bool:
-        """检查用户权限，判断用户是否有权限使用机器人"""
-        user_id = update.effective_user.id
-        user_name = update.effective_user.username
-        full_name = update.effective_user.full_name
-        
-        user_role = self.get_user_role(user_id)
-        
-        if user_role is None:
-            logger.warning(f"未授权的用户尝试访问，用户ID: {user_id}，用户名: {user_name}，全名: {full_name}")
-            await update.message.reply_text("未授权的用户")
-            return False
-            
-        logger.info(f"授权用户访问，用户ID: {user_id}，用户名: {user_name}，角色: {user_role.name}")
-        return True
-        
-    async def check_admin_permission(self, update: Update) -> bool:
-        """检查管理员权限，判断用户是否为管理员"""
-        user_id = update.effective_user.id
-        user_name = update.effective_user.username
-        full_name = update.effective_user.full_name
-        
-        user_role = self.get_user_role(user_id)
-        
-        if user_role != UserRole.ADMIN:
-            logger.warning(f"非管理员用户尝试执行管理操作，用户ID: {user_id}，用户名: {user_name}，全名: {full_name}")
-            await update.message.reply_text("此操作需要管理员权限")
-            return False
-            
-        logger.info(f"管理员执行操作，用户ID: {user_id}，用户名: {user_name}")
-        return True
         
     async def check_permission(self, update: Update, required_role: UserRole) -> bool:
         """检查用户是否有指定角色的权限
@@ -83,7 +51,6 @@ class UserManager:
         
         # 无效用户
         if user_role is None:
-            await update.message.reply_text("⚠️ 未授权的用户。")
             return False
         
         if user_role == UserRole.ADMIN:
@@ -91,7 +58,6 @@ class UserManager:
             
         # 需要管理员权限但用户不是管理员
         if required_role == UserRole.ADMIN and user_role != UserRole.ADMIN:
-            await update.message.reply_text("⚠️ 此操作需要管理员权限。")
             return False
             
         return required_role == user_role
