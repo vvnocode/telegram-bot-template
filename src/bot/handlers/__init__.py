@@ -11,7 +11,7 @@ import inspect
 from typing import List, Callable, Any, Dict
 
 # 导入所有处理器模块
-from . import start, help, status, user, menu, stats
+from . import start, help, status, user, menu, stats, ip
 
 def register_handlers(app: Application, user_manager: UserManager, stats_manager: UserStatsManager) -> None:
     """注册所有命令处理器
@@ -74,7 +74,7 @@ def auto_register_commands(command_registry: CommandRegistry) -> None:
     Args:
         command_registry: 命令注册表实例
     """
-    modules = [start, help, status, user, menu, stats]
+    modules = [start, help, status, user, menu, stats, ip]
     registered_count = 0
     
     for module in modules:
