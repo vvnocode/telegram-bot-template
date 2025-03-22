@@ -134,7 +134,7 @@ class CommandRegistry:
             if not await user_manager.check_permission(update, plugin.required_role):
                 role_name = plugin.required_role.name.lower()
                 await update.message.reply_text(
-                    f"⚠️ 权限不足，此命令需要 {role_name} 权限。",
+                    f"⚠️ 权限不足。",
                     parse_mode='Markdown'
                 )
                 return

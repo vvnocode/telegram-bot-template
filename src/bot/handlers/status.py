@@ -21,9 +21,6 @@ async def status_command(update: Update, context: ContextTypes.DEFAULT_TYPE, use
         context: 上下文对象
         user_manager: 用户管理器实例
     """
-    # 验证管理员权限
-    if not await user_manager.check_admin_permission(update):
-        return
     
     # 获取管理员信息
     admin_id = update.effective_user.id

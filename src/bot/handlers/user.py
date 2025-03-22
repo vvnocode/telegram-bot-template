@@ -14,9 +14,6 @@ async def user_list_command(update: Update, context: ContextTypes.DEFAULT_TYPE, 
         context: 上下文对象
         user_manager: 用户管理器实例
     """
-    # 验证管理员权限
-    if not await user_manager.check_admin_permission(update):
-        return
     
     # 获取所有用户列表
     users = user_manager.get_all_users()
@@ -54,9 +51,6 @@ async def add_user_command(update: Update, context: ContextTypes.DEFAULT_TYPE, u
         context: 上下文对象
         user_manager: 用户管理器实例
     """
-    # 验证管理员权限
-    if not await user_manager.check_admin_permission(update):
-        return
     
     # 检查命令参数
     if not context.args or len(context.args) != 1:
@@ -80,9 +74,6 @@ async def remove_user_command(update: Update, context: ContextTypes.DEFAULT_TYPE
         context: 上下文对象
         user_manager: 用户管理器实例
     """
-    # 验证管理员权限
-    if not await user_manager.check_admin_permission(update):
-        return
     
     # 检查命令参数
     if not context.args or len(context.args) != 1:

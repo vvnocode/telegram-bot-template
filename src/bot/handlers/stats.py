@@ -10,9 +10,6 @@ from src.utils import UserStatsManager
 
 async def stats_total_command(update: Update, context: ContextTypes.DEFAULT_TYPE, user_manager: UserManager):
     """处理/stats_total命令，显示总体命令使用统计，仅管理员可用"""
-    # 验证管理员权限
-    if not await user_manager.check_admin_permission(update):
-        return
     
     # 获取统计管理器
     stats_manager: UserStatsManager = context.bot_data.get('stats_manager')
@@ -28,9 +25,6 @@ async def stats_total_command(update: Update, context: ContextTypes.DEFAULT_TYPE
 
 async def stats_today_command(update: Update, context: ContextTypes.DEFAULT_TYPE, user_manager: UserManager):
     """处理/stats_today命令，显示今日命令使用统计，仅管理员可用"""
-    # 验证管理员权限
-    if not await user_manager.check_admin_permission(update):
-        return
     
     # 获取统计管理器
     stats_manager: UserStatsManager = context.bot_data.get('stats_manager')
@@ -46,9 +40,6 @@ async def stats_today_command(update: Update, context: ContextTypes.DEFAULT_TYPE
 
 async def stats_users_total_command(update: Update, context: ContextTypes.DEFAULT_TYPE, user_manager: UserManager):
     """处理/stats_users_total命令，显示所有用户的总体菜单使用详情，仅管理员可用"""
-    # 验证管理员权限
-    if not await user_manager.check_admin_permission(update):
-        return
     
     # 获取统计管理器
     stats_manager: UserStatsManager = context.bot_data.get('stats_manager')
@@ -64,9 +55,6 @@ async def stats_users_total_command(update: Update, context: ContextTypes.DEFAUL
 
 async def stats_users_today_command(update: Update, context: ContextTypes.DEFAULT_TYPE, user_manager: UserManager):
     """处理/stats_users_today命令，显示所有用户今日菜单使用详情，仅管理员可用"""
-    # 验证管理员权限
-    if not await user_manager.check_admin_permission(update):
-        return
     
     # 获取统计管理器
     stats_manager: UserStatsManager = context.bot_data.get('stats_manager')
@@ -82,9 +70,6 @@ async def stats_users_today_command(update: Update, context: ContextTypes.DEFAUL
 
 async def stats_user_command(update: Update, context: ContextTypes.DEFAULT_TYPE, user_manager: UserManager):
     """处理/stats_user命令，显示指定用户的统计信息，仅管理员可用"""
-    # 验证管理员权限
-    if not await user_manager.check_admin_permission(update):
-        return
     
     # 获取统计管理器
     stats_manager: UserStatsManager = context.bot_data.get('stats_manager')
@@ -126,7 +111,9 @@ async def show_total_stats(update: Update, stats_manager: UserStatsManager):
     sorted_commands = sorted(command_summary.items(), key=lambda x: x[1], reverse=True)
     
     for command, count in sorted_commands:
-        message += f"/{command}: {count}次\n"
+        # 转义命令名称中的下划线
+        escaped_command = command.replace('_', '\\_')
+        message += f"/{escaped_command}: {count}次\n"
     
     # 计算总使用次数
     total_usage = sum(command_summary.values())
@@ -162,7 +149,9 @@ async def show_daily_stats(update: Update, stats_manager: UserStatsManager, day:
     sorted_commands = sorted(command_summary.items(), key=lambda x: x[1], reverse=True)
     
     for command, count in sorted_commands:
-        message += f"/{command}: {count}次\n"
+        # 转义命令名称中的下划线
+        escaped_command = command.replace('_', '\\_')
+        message += f"/{escaped_command}: {count}次\n"
     
     # 计算总使用次数
     total_usage = sum(command_summary.values())
@@ -261,6 +250,7 @@ async def show_users_menu_stats(update: Update, stats_manager: UserStatsManager,
             sorted_commands = sorted(user_menu_stats[user_id].items(), key=lambda x: x[1], reverse=True)
             
             for cmd, count in sorted_commands:
+                # 转义命令名称中的下划线
                 escaped_cmd = cmd.replace('_', '\\_')
                 message += f"  /{escaped_cmd}: {count}次\n"
             
@@ -297,17 +287,17 @@ async def show_users_menu_daily_stats(update: Update, stats_manager: UserStatsMa
         user_manager: 用户管理器实例
         day: 日期对象
     """
-    # 获取所有用户的指定日期统计
-    daily_stats = stats_manager.get_all_daily_stats(day)
+    # 获取指定日期的统计数据
+    all_stats = stats_manager.get_all_daily_stats(day)
     
-    if not daily_stats:
+    if not all_stats:
         await update.message.reply_text(f"📊 {day.isoformat()} 没有统计数据")
         return
     
-    # 构建按用户分组的菜单使用情况 (而不是按菜单分组)
+    # 构建按用户分组的菜单使用情况
     user_menu_stats = {}
     
-    for user_id, commands in daily_stats.items():
+    for user_id, commands in all_stats.items():
         user_menu_stats[user_id] = commands
     
     # 获取用户角色信息
@@ -327,6 +317,7 @@ async def show_users_menu_daily_stats(update: Update, stats_manager: UserStatsMa
             sorted_commands = sorted(user_menu_stats[user_id].items(), key=lambda x: x[1], reverse=True)
             
             for cmd, count in sorted_commands:
+                # 转义命令名称中的下划线
                 escaped_cmd = cmd.replace('_', '\\_')
                 message += f"  /{escaped_cmd}: {count}次\n"
             
