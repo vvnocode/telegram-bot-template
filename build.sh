@@ -8,7 +8,7 @@ pip install pyinstaller
 pyinstaller --onefile \
     --name telegram-bot-template \
     --add-data "config/config.yaml.example:." \
-    --add-data "config/command.yaml.example:." \
+    --add-data "config/commands.yaml.example:." \
     --hidden-import telegram \
     --hidden-import yaml \
     --paths src \
