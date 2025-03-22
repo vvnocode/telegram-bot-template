@@ -18,6 +18,7 @@ class CommandCategory(Enum):
     USER = "用户管理"
     SYSTEM = "系统管理"
     TOOLS = "实用工具"
+    STATS = "统计分析"
 
 @dataclass
 class CommandPlugin:
@@ -92,43 +93,64 @@ class CommandRegistry:
         except Exception as e:
             logger.error(f"加载命令配置文件出错: {str(e)}", exc_info=True)
     
-    def setup_command_handlers(self, application: Application) -> None:
-        """设置所有命令处理器"""
-        self.application = application
+    def setup_command_handlers(self, app: Application) -> None:
+        """设置所有命令的处理器
         
-        # 注册所有命令处理器
-        for cmd_name, cmd in self.commands.items():
-            handler = CommandHandler(
-                cmd_name,
-                lambda update, context, cmd=cmd: self._handle_command(update, context, cmd)
-            )
-            cmd.handler_instance = handler
-            application.add_handler(handler)
+        Args:
+            app: Telegram应用实例
+        """
+        self.application = app
+        
+        # 记录全局用户管理器引用
+        app.bot_data['user_manager'] = self.user_manager
+        
+        # 创建并注册所有命令的处理器
+        for command_name, plugin in self.commands.items():
+            logger.debug(f"为命令 /{command_name} 创建处理器")
             
-        logger.info(f"已注册 {len(self.commands)} 个命令处理器")
-    
-    async def _handle_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE, cmd: CommandPlugin) -> None:
-        """通用命令处理函数"""
-        # 检查用户权限
-        user_role = self.user_manager.get_user_role(update.effective_user.id)
-        
-        # 记录命令请求
-        logger.info(f"用户 {update.effective_user.id} ({update.effective_user.username}) 请求执行命令 /{cmd.command}")
-        
-        # 如果用户无权限，拒绝访问
-        if user_role is None:
-            logger.warning(f"未授权用户 {update.effective_user.id} 尝试执行命令 /{cmd.command}")
-            await update.message.reply_text("未授权的用户")
-            return
-        
-        # 检查用户是否有执行此命令的权限
-        if cmd.required_role == UserRole.ADMIN and user_role != UserRole.ADMIN:
-            logger.warning(f"普通用户 {update.effective_user.id} 尝试执行管理员命令 /{cmd.command}")
-            await update.message.reply_text("此命令需要管理员权限")
-            return
+            # 创建命令处理器并保存实例
+            handler = CommandHandler(command_name, self._create_command_handler(plugin))
+            plugin.handler_instance = handler
             
-        # 执行命令处理函数
-        await cmd.handler(update, context, self.user_manager)
+            # 注册到应用
+            app.add_handler(handler)
+            
+        logger.info(f"共设置了 {len(self.commands)} 个命令处理器")
+        
+    def _create_command_handler(self, plugin: CommandPlugin) -> Callable:
+        """创建命令处理函数的包装器，添加权限检查等通用功能
+        
+        Args:
+            plugin: 命令插件对象
+            
+        Returns:
+            Callable: 包装后的处理函数
+        """
+        user_manager = self.user_manager
+        
+        async def handler_wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE):
+            """命令处理函数包装器"""
+            # 检查用户权限
+            if not await user_manager.check_permission(update, plugin.required_role):
+                role_name = plugin.required_role.name.lower()
+                await update.message.reply_text(
+                    f"⚠️ 权限不足，此命令需要 {role_name} 权限。",
+                    parse_mode='Markdown'
+                )
+                return
+                
+            # 获取统计管理器（如果存在）
+            stats_manager = context.bot_data.get('stats_manager')
+            
+            # 记录命令使用情况
+            if stats_manager:
+                user_id = str(update.effective_user.id)
+                stats_manager.record_command_usage(user_id, plugin.command)
+                
+            # 调用实际处理函数
+            await plugin.handler(update, context, user_manager)
+            
+        return handler_wrapper
     
     async def setup_bot_commands(self) -> None:
         """设置机器人命令列表，使其显示在左下角菜单中"""

@@ -53,7 +53,9 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE, user_
             help_message += f"*{category.value}*\n"
             
             for cmd in commands:
-                help_message += f"/{cmd.command} - {cmd.description}\n"
+                # 在命令中转义下划线，防止被Markdown解析为斜体
+                command_text = cmd.command.replace("_", "\\_")
+                help_message += f"/{command_text} - {cmd.description}\n"
             
             help_message += "\n"
     

@@ -65,6 +65,7 @@ install() {
     echo "创建工作目录..."
     mkdir -p "$INSTALL_DIR"
     mkdir -p "$INSTALL_DIR/logs"
+    mkdir -p "$INSTALL_DIR/data/stats/daily"
     
     echo "下载程序文件..."
     if ! curl -L -o "$INSTALL_DIR/telegram-bot-template" "$BINARY_URL"; then
