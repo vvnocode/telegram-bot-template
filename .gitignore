@@ -174,5 +174,7 @@ cython_debug/
 .pypirc
 
 # project
-config/config.yaml
-config/commands.yaml
+config.yaml
+commands.yaml
+telegram-bot-template
+telegram-bot-template.spec
