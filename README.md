@@ -86,38 +86,6 @@ pip install -r requirements.txt
 python src/main.py
 ```
 
-## 自动构建
-
-1. 支持打tag后，使用actions自动构建。
-2. 未使用全局Token，需要自己创建 [tokens](https://github.com/settings/tokens)。
-3. 需要配置MY_GITHUB_TOKEN
-    路径：Project - Settins -> Security -> Secrets and variables -> Repository secrets
-    参数：MY_GITHUB_TOKEN
-    值为步骤2的token
-
-## 常见问题
-
-### 1. 如何获取 Telegram Bot Token？
-1. 在 Telegram 中找到 @BotFather
-2. 发送 `/newbot` 命令
-3. 按照提示设置 bot 名称
-4. 获取 bot token
-
-### 2. 如何获取 Chat ID？
-1. 在 Telegram 中找到 @userinfobot
-2. 发送任意消息
-3. 机器人会返回你的 Chat ID
-
-### 3. 如何添加用户？
-有两种方式：
-1. 通过用户ID添加: `/adduser <用户ID>`
-
-## 贡献指南
-欢迎提交 Pull Request 或 Issue 来帮助改进项目。
-
-## 许可证
-MIT License
-
 ## 项目结构
 
 ```
@@ -251,6 +219,32 @@ commands:
     is_visible: true
 ```
 
+## 自动构建
+
+1. 支持打tag后，使用actions自动构建。
+2. 未使用全局Token，需要自己创建 [tokens](https://github.com/settings/tokens)。
+3. 需要配置MY_GITHUB_TOKEN
+    路径：Project - Settins -> Security -> Secrets and variables -> Repository secrets
+    参数：MY_GITHUB_TOKEN
+    值为步骤2的token
+
+## 常见问题
+
+### 1. 如何获取 Telegram Bot Token？
+1. 在 Telegram 中找到 @BotFather
+2. 发送 `/newbot` 命令
+3. 按照提示设置 bot 名称
+4. 获取 bot token
+
+### 2. 如何获取 Chat ID？
+1. 在 Telegram 中找到 @userinfobot
+2. 发送任意消息
+3. 机器人会返回你的 Chat ID
+
+### 3. 如何添加用户？
+有两种方式：
+1. 通过用户ID添加: `/adduser <用户ID>`
+
 ## 效果展示
 
 ### 普通用户界面
@@ -261,3 +255,9 @@ commands:
 
 ### 菜单管理
 ![](img/menu.jpg)
+
+## 贡献指南
+欢迎提交 Pull Request 或 Issue 来帮助改进项目。
+
+## 许可证
+MIT License
