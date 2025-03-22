@@ -2,3 +2,21 @@
 telegram_bot_token: "YOUR_BOT_TOKEN_HERE"  # 你的Telegram Bot Token
 telegram_admin_id: "ADMIN_ID_1,ADMIN_ID_2" # 管理员用户ID, 多个用户ID用逗号分隔
 telegram_user_id: "USER_ID_1,USER_ID_2"    # 授权的普通用户ID, 多个用户ID用逗号分隔
+
+# 获取前IP，返回ip地址。配置多个当一个失败时，会自动切换到下一个。
+get_ip_cmd: 
+  - 'curl -s api-ipv4.ip.sb/ip'
+
+# 更换IP
+change_ip:
+  type: api             # 更换IP的方式，cmd: 命令行更换，api: 通过API更换
+  cmd: ''      # 更换IP的命令
+  api: '' # 更换IP的API
+  api_header: '' # 选填，更换IP的API头，如：'token: 1234567890'
+  api_data: '' # 选填，更换IP的API数据，如：'{"token": "gfgggg"}'
+  api_method: 'POST'      # 选填，更换IP的API方法
+  change_interval: 5 # 选填，更换IP的间隔时间，单位：分钟
+  change_day_limit: 3 # 选填，每日更换IP的总次数
+  change_day_limit_every_user: 2 # 选填，每日更换IP限制次数，每个用户只能更换1次
+  change_day_begin: '00:00:00' # 选填，每日更换IP限制次数的开始时间（如：00:00:00 代表从00:00:00开始计算，到第二天00:00:00结束），HH:mm:ss
+  change_ip_check_wait: 1 # 选填，更换IP后检查更换IP是否成功的等待时间，单位：秒
