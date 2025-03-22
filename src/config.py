@@ -7,7 +7,7 @@ def load_config() -> Dict[str, Any]:
     # 优先查找当前目录
     config_paths = [
         "config.yaml",  # 当前目录
-        os.path.join(os.path.dirname(__file__), "..", "config/config.yaml"),  # 项目根目录
+        os.path.join(os.path.dirname(__file__), "..", "config.yaml"),  # 项目根目录
         "/etc/telegram-bot-template/config.yaml"  # 系统路径
     ]
     

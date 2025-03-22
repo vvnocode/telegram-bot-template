@@ -11,7 +11,7 @@ class UserManager:
     def __init__(self, config: Dict[str, Any]):
         """初始化用户管理类"""
         self.config = config
-        self.config_file = config.get('config_file', 'config/config.yaml')
+        self.config_file = config.get('config_file', 'config.yaml')
         self.admin_ids = self._parse_admin_ids(config.get('telegram_admin_id', ''))
         self.allowed_user_ids = self._parse_user_ids(config.get('telegram_user_id', ''))
         
