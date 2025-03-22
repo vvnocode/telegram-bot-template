@@ -4,6 +4,7 @@ from typing import Dict, Any
 
 from src.auth import UserManager
 from src.logger import logger
+from src.utils import UserStatsManager
 
 class TelegramBot:
     """Telegram机器人核心类"""
@@ -15,6 +16,7 @@ class TelegramBot:
         """
         self.config = config
         self.user_manager = UserManager(config)
+        self.stats_manager = UserStatsManager()
         self.app = None
         
     def setup(self) -> None:
@@ -26,7 +28,7 @@ class TelegramBot:
         
         # 注册命令处理器（由各个handlers模块处理）
         from src.bot.handlers import register_handlers
-        register_handlers(self.app, self.user_manager)
+        register_handlers(self.app, self.user_manager, self.stats_manager)
         
         logger.info("机器人初始化完成")
     

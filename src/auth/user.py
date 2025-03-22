@@ -68,6 +68,34 @@ class UserManager:
         logger.info(f"管理员执行操作，用户ID: {user_id}，用户名: {user_name}")
         return True
         
+    async def check_permission(self, update: Update, required_role: UserRole) -> bool:
+        """检查用户是否有指定角色的权限
+        
+        Args:
+            update: 更新对象
+            required_role: 所需角色
+            
+        Returns:
+            bool: 是否有权限
+        """
+        user_id = update.effective_user.id
+        user_role = self.get_user_role(user_id)
+        
+        # 无效用户
+        if user_role is None:
+            await update.message.reply_text("⚠️ 未授权的用户。")
+            return False
+        
+        if user_role == UserRole.ADMIN:
+            return True
+            
+        # 需要管理员权限但用户不是管理员
+        if required_role == UserRole.ADMIN and user_role != UserRole.ADMIN:
+            await update.message.reply_text("⚠️ 此操作需要管理员权限。")
+            return False
+            
+        return required_role == user_role
+        
     def add_user(self, user_id: str) -> bool:
         """添加普通用户
         

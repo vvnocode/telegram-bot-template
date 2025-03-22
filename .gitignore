@@ -178,3 +178,4 @@ config.yaml
 commands.yaml
 telegram-bot-template
 telegram-bot-template.spec
+data

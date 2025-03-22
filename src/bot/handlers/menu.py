@@ -57,8 +57,9 @@ async def menu_command(update: Update, context: ContextTypes.DEFAULT_TYPE, user_
                 else:
                     permission_mark = "👤"
                     
-                # 添加命令信息，移除反引号使命令可点击
-                menu_message += f"{permission_mark} /{cmd.command} - {cmd.description}\n"
+                # 添加命令信息，并且转义下划线
+                escaped_cmd = cmd.command.replace('_', '\\_')
+                menu_message += f"{permission_mark} /{escaped_cmd} - {cmd.description}\n"
             
             menu_message += "\n"
     

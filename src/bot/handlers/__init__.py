@@ -2,6 +2,7 @@ from telegram.ext import Application
 from src.auth import UserManager
 from src.logger import logger
 from src.bot.handlers.command import CommandRegistry
+from src.utils import UserStatsManager
 import os
 # import asyncio
 # import importlib
@@ -10,14 +11,15 @@ import inspect
 from typing import List, Callable, Any, Dict
 
 # 导入所有处理器模块
-from . import start, help, status, user, menu
+from . import start, help, status, user, menu, stats
 
-def register_handlers(app: Application, user_manager: UserManager) -> None:
+def register_handlers(app: Application, user_manager: UserManager, stats_manager: UserStatsManager) -> None:
     """注册所有命令处理器
     
     Args:
         app: Telegram应用实例
         user_manager: 用户管理器实例
+        stats_manager: 统计管理器实例
     """
     logger.info("注册命令处理器...")
     
@@ -41,8 +43,9 @@ def register_handlers(app: Application, user_manager: UserManager) -> None:
     # 设置命令处理器
     command_registry.setup_command_handlers(app)
     
-    # 将命令注册表添加到bot_data中，以便其他处理器访问
+    # 将命令注册表和统计管理器添加到bot_data中，以便其他处理器访问
     app.bot_data['command_registry'] = command_registry
+    app.bot_data['stats_manager'] = stats_manager
     
     logger.info("命令处理器注册完成")
     
@@ -71,7 +74,7 @@ def auto_register_commands(command_registry: CommandRegistry) -> None:
     Args:
         command_registry: 命令注册表实例
     """
-    modules = [start, help, status, user, menu]
+    modules = [start, help, status, user, menu, stats]
     registered_count = 0
     
     for module in modules:
