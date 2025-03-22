@@ -57,8 +57,8 @@ async def menu_command(update: Update, context: ContextTypes.DEFAULT_TYPE, user_
                 else:
                     permission_mark = "👤"
                     
-                # 添加命令信息
-                menu_message += f"{permission_mark} `/{cmd.command}` - {cmd.description}\n"
+                # 添加命令信息，移除反引号使命令可点击
+                menu_message += f"{permission_mark} /{cmd.command} - {cmd.description}\n"
             
             menu_message += "\n"
     
