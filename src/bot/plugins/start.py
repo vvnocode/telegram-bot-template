@@ -57,7 +57,7 @@ class StartPlugin(PluginInterface):
         else:
             welcome_message += "👤 您现在以 *普通用户* 身份登录。\n\n"
         
-        welcome_message += "🔍 输入 /help 查看可用命令。"
+        welcome_message += "🔍 输入 /menu 查看可用命令。"
         
         # 回复用户
         await update.message.reply_text(

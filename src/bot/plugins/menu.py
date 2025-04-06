@@ -26,16 +26,6 @@ class MenuPlugin(PluginInterface):
                 required_role=UserRole.USER
             )
         )
-        
-        self.register_command(
-            CommandInfo(
-                command="help",
-                description="获取帮助信息",
-                handler=self.help_command,
-                category=CommandCategory.MENU,
-                required_role=UserRole.USER
-            )
-        )
     
     async def menu_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE, user_manager: UserManager):
         """处理/menu命令，显示所有可用命令及其权限
@@ -106,43 +96,3 @@ class MenuPlugin(PluginInterface):
         
         # 发送菜单消息
         await update.message.reply_text(menu_message, parse_mode='Markdown')
-    
-    async def help_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE, user_manager: UserManager):
-        """处理/help命令，显示帮助信息
-        
-        Args:
-            update: Telegram更新对象
-            context: 上下文对象
-            user_manager: 用户管理器实例
-        """
-        # 获取用户信息
-        user_id = update.effective_user.id
-        user_role = user_manager.get_user_role(user_id)
-        
-        # 如果用户无权限，拒绝访问
-        if user_role is None:
-            logger.warning(f"未授权的用户 {user_id} 尝试获取帮助")
-            await update.message.reply_text("未授权的用户")
-            return
-        
-        logger.info(f"用户 {user_id} 请求帮助，角色: {user_role.name}")
-        
-        # 获取插件加载器
-        plugin_loader = context.bot_data.get('plugin_loader')
-        
-        if not plugin_loader:
-            await update.message.reply_text("系统尚未完全初始化，请稍后再试")
-            return
-        
-        # 生成帮助消息
-        help_message = "🤖 *机器人帮助*\n\n"
-        help_message += "这是一个多功能Telegram机器人，提供以下插件功能：\n\n"
-        
-        # 添加已加载的插件信息
-        for plugin_name, plugin in plugin_loader.get_all_plugins().items():
-            help_message += f"• *{plugin.description}* (v{plugin.version})\n"
-        
-        help_message += "\n使用 /menu 命令查看所有可用的命令及其详细信息。\n"
-        
-        # 发送帮助消息
-        await update.message.reply_text(help_message, parse_mode='Markdown') 
