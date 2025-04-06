@@ -5,6 +5,7 @@ from typing import Dict, Any
 from src.auth import UserManager
 from src.logger import logger
 from src.utils import UserStatsManager
+from src.bot.plugins.loader import PluginLoader
 
 class TelegramBot:
     """Telegram机器人核心类"""
@@ -17,18 +18,21 @@ class TelegramBot:
         self.config = config
         self.user_manager = UserManager(config)
         self.stats_manager = UserStatsManager()
+        self.plugin_loader = PluginLoader(self.user_manager, config)
         self.app = None
         
     def setup(self) -> None:
-        """设置机器人，注册处理器"""
+        """设置机器人，加载插件"""
         logger.info("机器人开始初始化...")
         
         # 创建应用实例
         self.app = ApplicationBuilder().token(self.config["telegram_bot_token"]).build()
         
-        # 注册命令处理器（由各个handlers模块处理）
-        from src.bot.handlers import register_handlers
-        register_handlers(self.app, self.user_manager, self.stats_manager)
+        # 添加统计管理器到应用数据
+        self.app.bot_data['stats_manager'] = self.stats_manager
+        
+        # 加载并设置插件
+        self.plugin_loader.setup_plugins(self.app)
         
         logger.info("机器人初始化完成")
     
@@ -38,6 +42,16 @@ class TelegramBot:
             self.setup()
             
         logger.info("机器人开始运行...")
+        
+        # 设置启动后的命令菜单
+        async def post_init(application: Application):
+            logger.info("应用启动后设置命令菜单")
+            await self.plugin_loader.setup_bot_commands(application)
+        
+        # 注册应用启动处理器
+        self.app.post_init = post_init
+        
+        # 开始轮询
         self.app.run_polling()
         
     def get_application(self) -> Application:

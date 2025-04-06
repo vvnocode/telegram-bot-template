@@ -6,3 +6,11 @@ telegram_user_id: "USER_ID_1,USER_ID_2"    # 授权的普通用户ID, 多个用�
 # 获取前IP，返回ip地址。配置多个当一个失败时，会自动切换到下一个。
 get_ip_cmd: 
   - 'curl -s api-ipv4.ip.sb/ip'
+
+  # 插件配置
+# plugins:
+  # 启用的插件列表，如果为空，则加载所有未被禁用的插件
+  # enabled: ["start"]
+  
+  # 禁用的插件列表，这些插件将不会被加载
+  # disabled: []
