@@ -6,7 +6,7 @@ GREEN='\033[0;32m'
 NC='\033[0m'
 
 # 定义安装目录
-INSTALL_DIR="/etc/telegram-bot-template"
+INSTALL_DIR="/opt/telegram-bot-template"
 REPO_URL="https://github.com/vvnocode/telegram-bot-template"
 BINARY_URL="$REPO_URL/releases/latest/download/telegram-bot-template"
 CONFIG_URL="$REPO_URL/raw/main/config/config.yaml.example"
@@ -66,6 +66,7 @@ install() {
     mkdir -p "$INSTALL_DIR"
     mkdir -p "$INSTALL_DIR/logs"
     mkdir -p "$INSTALL_DIR/data/stats/daily"
+    # mkdir -p "$INSTALL_DIR/plugins"  # 创建外部插件目录
     
     echo "下载程序文件..."
     if ! curl -L -o "$INSTALL_DIR/telegram-bot-template" "$BINARY_URL"; then
@@ -122,6 +123,7 @@ EOF
     echo -e "\n${GREEN}=== 安装完成! ===${NC}"
     echo "配置文件位置: $INSTALL_DIR/config.yaml"
     echo "日志文件位置: $INSTALL_DIR/logs/bot.log"
+    # echo "外部插件目录: $INSTALL_DIR/plugins"
     echo "使用以下命令管理服务:"
     echo "systemctl start/stop/restart telegram-bot-template"
 }

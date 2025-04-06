@@ -3,6 +3,7 @@ import importlib
 import inspect
 import os
 import sys
+import pkgutil
 from typing import Dict, List, Type, Set, Any
 
 from telegram import BotCommand
@@ -23,12 +24,12 @@ class PluginLoader:
             config: 配置字典
         """
         self.user_manager = user_manager
-        self.config = config
+        self.config = config or {}
         self.plugins: Dict[str, PluginInterface] = {}
         self.all_plugin_classes: Dict[str, Type[PluginInterface]] = {}
         
         # 从配置中获取插件启用和禁用列表
-        plugin_config = config.get('plugins', {})
+        plugin_config = self.config.get('plugins', {}) or {}
         self.enabled_plugins: List[str] = plugin_config.get('enabled', [])
         self.disabled_plugins: List[str] = plugin_config.get('disabled', [])
     
@@ -36,36 +37,122 @@ class PluginLoader:
         """发现所有可用插件"""
         logger.info("开始发现插件...")
         
-        # 获取插件目录路径
-        plugin_dir = os.path.dirname(os.path.abspath(__file__))
+        # 1. 首先从内置插件加载
+        self._discover_internal_plugins()
         
-        # 遍历插件目录中的所有文件
-        for filename in os.listdir(plugin_dir):
-            # 忽略非Python文件和特殊文件
-            if not filename.endswith('.py') or filename.startswith('__') or filename in ['interface.py', 'loader.py']:
-                continue
-                
-            module_name = filename[:-3]  # 去掉.py扩展名
-            full_module_path = f"src.bot.plugins.{module_name}"
-            
-            try:
-                # 动态导入模块
-                module = importlib.import_module(full_module_path)
-                
-                # 查找模块中继承自PluginInterface的所有类
-                for name, obj in inspect.getmembers(module):
-                    if (inspect.isclass(obj) and 
-                        issubclass(obj, PluginInterface) and 
-                        obj is not PluginInterface):
-                        
-                        plugin_name = obj.name
-                        self.all_plugin_classes[plugin_name] = obj
-                        logger.info(f"发现插件: {plugin_name} ({obj.description})")
-            
-            except Exception as e:
-                logger.error(f"加载插件模块 {full_module_path} 时出错: {str(e)}", exc_info=True)
+        # 2. 从外部插件目录加载
+        self._discover_external_plugins()
         
         logger.info(f"插件发现完成，共找到 {len(self.all_plugin_classes)} 个插件")
+    
+    def _discover_internal_plugins(self) -> None:
+        """发现内部插件"""
+        try:
+            logger.info("加载内置插件...")
+            
+            # 方法1：尝试直接导入已知的内置插件模块
+            try:
+                # 直接导入内置插件
+                from src.bot.plugins import menu, start, ip
+                
+                internal_modules = [menu, start, ip]
+                for module in internal_modules:
+                    self._register_plugins_from_module(module, "内置")
+            except ImportError as e:
+                logger.warning(f"导入内置插件模块失败: {str(e)}")
+            
+            # 方法2：通过包引用尝试查找所有插件模块
+            try:
+                import src.bot.plugins as plugins_package
+                
+                # 获取插件包路径
+                package_path = os.path.dirname(plugins_package.__file__)
+                logger.info(f"内置插件包路径: {package_path}")
+                
+                # 遍历包中的所有模块
+                for _, module_name, is_pkg in pkgutil.iter_modules([package_path]):
+                    # 忽略特殊模块和子包
+                    if not is_pkg and module_name not in ['__init__', 'interface', 'loader']:
+                        try:
+                            # 导入模块
+                            module = importlib.import_module(f"src.bot.plugins.{module_name}")
+                            self._register_plugins_from_module(module, "内置")
+                        except ImportError as e:
+                            logger.warning(f"导入模块 {module_name} 失败: {str(e)}")
+            except Exception as e:
+                logger.warning(f"从包引用查找插件失败: {str(e)}")
+        
+        except Exception as e:
+            logger.error(f"发现内部插件时出错: {str(e)}", exc_info=True)
+    
+    def _discover_external_plugins(self) -> None:
+        """从外部目录发现插件"""
+        try:
+            # 获取外部插件目录
+            # 尝试多个可能的位置
+            base_paths = []
+            
+            # 1. 使用相对于可执行文件的路径
+            if getattr(sys, 'frozen', False):
+                # 在打包环境中
+                base_paths.append(os.path.join(os.path.dirname(sys.executable), 'plugins'))
+            
+            # 2. 使用相对于项目根目录的路径
+            try:
+                # 项目根目录通常是src的父目录
+                project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+                base_paths.append(os.path.join(project_root, 'plugins'))
+            except Exception:
+                pass
+            
+            # 3. 使用当前工作目录
+            base_paths.append(os.path.join(os.getcwd(), 'plugins'))
+            
+            # 尝试每个可能的路径
+            for plugin_dir in base_paths:
+                if os.path.exists(plugin_dir) and os.path.isdir(plugin_dir):
+                    logger.info(f"发现外部插件目录: {plugin_dir}")
+                    
+                    # 将插件目录添加到Python路径
+                    if plugin_dir not in sys.path:
+                        sys.path.insert(0, os.path.dirname(plugin_dir))
+                    
+                    # 遍历目录中的所有.py文件
+                    for filename in os.listdir(plugin_dir):
+                        if filename.endswith('.py') and not filename.startswith('__'):
+                            module_name = filename[:-3]  # 去掉.py扩展名
+                            
+                            try:
+                                # 导入模块
+                                module = importlib.import_module(f"plugins.{module_name}")
+                                self._register_plugins_from_module(module, "外部")
+                            except Exception as e:
+                                logger.error(f"导入外部插件模块 {module_name} 失败: {str(e)}")
+        except Exception as e:
+            logger.error(f"发现外部插件时出错: {str(e)}", exc_info=True)
+    
+    def _register_plugins_from_module(self, module: Any, source: str) -> None:
+        """从模块中注册插件
+        
+        Args:
+            module: 模块对象
+            source: 插件来源描述
+        """
+        # 查找模块中继承自PluginInterface的所有类
+        for name, obj in inspect.getmembers(module):
+            if (inspect.isclass(obj) and 
+                issubclass(obj, PluginInterface) and 
+                obj is not PluginInterface):
+                
+                plugin_name = obj.name
+                
+                # 检查是否已存在同名插件
+                if plugin_name in self.all_plugin_classes:
+                    logger.warning(f"发现重复的插件名称: {plugin_name}，将忽略{source}插件")
+                    continue
+                
+                self.all_plugin_classes[plugin_name] = obj
+                logger.info(f"发现{source}插件: {plugin_name} ({obj.description})")
     
     def load_plugins(self) -> None:
         """根据配置加载插件"""
