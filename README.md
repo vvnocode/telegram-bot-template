@@ -8,7 +8,8 @@
 - 🔄 **自动注册命令** - 符合命名规范的命令自动被发现和注册
 - 📋 **命令菜单管理** - 可查看所有可用命令及其权限
 - 👑 **用户管理功能** - 管理员可添加/删除普通用户和其他管理员
-- ⚙️ **配置文件支持** - 通过YAML配置文件覆盖命令默认设置
+- 🔌 **动态插件加载** - 支持从内部和外部目录加载插件
+- ⚙️ **配置文件支持** - 通过YAML配置文件控制插件的启用与禁用
 - 🖥️ **系统状态监控** - 查看机器人运行状态、系统资源使用情况
 - 🔧 **简单易用的API** - 清晰的接口设计，便于扩展
 
@@ -26,12 +27,20 @@ bash <(curl -L -s https://raw.githubusercontent.com/vvnocode/telegram-bot-templa
 
 安装完成后可以手动修改配置文件，修改完成后需要重启服务：`systemctl restart telegram-bot-template`
 
-配置文件位于 `/etc/telegram-bot-template/config.yaml`，示例：
+配置文件位于 `/opt/telegram-bot-template/config.yaml`，示例：
 ```yaml
 # Telegram配置
 telegram_bot_token: ""               # 你的Telegram Bot Token
 telegram_admin_id: ""  # 管理员用户ID, 多个用户ID用逗号分隔
 telegram_user_id: ""     # 授权的普通用户ID, 多个用户ID用逗号分隔
+
+# 插件配置
+plugins:
+  # 启用的插件列表，如果为空，则加载所有未被禁用的插件
+  enabled: []
+  
+  # 禁用的插件列表，这些插件将不会被加载
+  disabled: ["ip"]  # 禁用示例
 ```
 
 ### Telegram Bot 命令
@@ -39,13 +48,16 @@ telegram_user_id: ""     # 授权的普通用户ID, 多个用户ID用逗号分�
 - `/start` - 机器人使用入口
 - `/help` - 显示帮助信息
 - `/menu` - 查看所有可用命令及权限
-- `/admin` - 管理员控制面板(需管理员权限)
 - `/users` - 查看所有用户列表(需管理员权限)
 - `/adduser` - 添加普通用户(需管理员权限)
 - `/deluser` - 删除普通用户(需管理员权限)
-- `/addadmin` - 添加管理员(需管理员权限)
-- `/deladmin` - 将管理员降级为普通用户(需管理员权限)
 - `/status` - 查看系统状态(需管理员权限)
+- `/get_ip` - 查看当前IP地址
+- `/stats_total` - 显示所有命令的总体使用统计(需管理员权限)
+- `/stats_today` - 显示所有命令的今日使用统计(需管理员权限)
+- `/stats_users_total` - 显示所有用户的各菜单使用详情统计(需管理员权限)
+- `/stats_users_today` - 显示所有用户的今日各菜单使用详情(需管理员权限)
+- `/stats_user` - 显示指定用户的统计信息(需管理员权限)
 
 ### 服务管理
 
@@ -101,22 +113,26 @@ telegram-bot-template/
 │   ├── bot/                  # 机器人核心功能
 │   │   ├── __init__.py
 │   │   ├── core.py           # Bot核心类
-│   │   └── handlers/         # 命令处理器
-│   │       ├── __init__.py   # 处理器注册
-│   │       ├── command.py    # 命令插件系统
-│   │       ├── start.py      # /start命令处理
-│   │       ├── help.py       # /help命令处理
-│   │       ├── admin.py      # /admin命令处理
-│   │       ├── status.py     # /status命令处理
-│   │       ├── user.py       # 用户管理命令
-│   │       └── menu.py       # 菜单命令处理
+│   │   ├── plugins/          # 插件系统
+│   │   │   ├── __init__.py
+│   │   │   ├── interface.py  # 插件接口定义
+│   │   │   ├── loader.py     # 插件加载器
+│   │   │   ├── menu.py       # 菜单插件
+│   │   │   ├── start.py      # 启动插件
+│   │   │   ├── user.py       # 用户管理插件
+│   │   │   ├── stats.py      # 统计插件
+│   │   │   ├── ip.py         # IP工具插件
+│   │   │   └── README.md     # 插件开发文档
+│   │   └── utils/            # 机器人工具函数
+│   │       ├── __init__.py
+│   │       └── message_helper.py # 消息处理助手
 │   ├── auth/                 # 用户认证模块
 │   │   ├── __init__.py
 │   │   ├── permissions.py    # 权限定义
 │   │   └── user.py           # 用户管理
 │   └── utils/                # 工具函数
 │       ├── __init__.py
-│       └── helpers.py
+│       └── stats.py          # 统计管理
 └── requirements.txt          # 依赖列表
 ```
 
@@ -125,7 +141,7 @@ telegram-bot-template/
 本机器人实现了完善的用户权限管理机制，分为两种角色：
 
 1. **普通用户**：可以访问基本命令，如`/start`、`/help`和`/menu`
-2. **管理员**：除了普通用户的权限外，还可以访问管理命令，如`/admin`、`/status`和用户管理命令
+2. **管理员**：除了普通用户的权限外，还可以访问管理命令，如`/status`和用户管理命令
 
 ### 添加或删除用户
 
@@ -134,12 +150,10 @@ telegram-bot-template/
 - `/users` - 查看所有用户和管理员列表
 - `/adduser <用户ID>` - 添加普通用户（也可转发用户消息后回复此命令）
 - `/deluser <用户ID>` - 删除普通用户
-- `/addadmin <用户ID>` - 将用户提升为管理员
-- `/deladmin <用户ID>` - 将管理员降级为普通用户
 
 ### 配置权限
 
-在配置文件`config/config.yaml`中设置用户ID：
+在配置文件`config.yaml`中设置用户ID：
 
 ```yaml
 # 普通用户ID列表，用逗号分隔
@@ -149,75 +163,97 @@ telegram_user_id: "USER_ID_1,USER_ID_2"
 telegram_admin_id: "ADMIN_ID_1,ADMIN_ID_2"
 ```
 
-## 插件式命令系统
+## 插件系统
 
-本机器人采用插件式命令系统，便于扩展新功能：
+本机器人采用全新的插件系统，支持动态加载内部和外部插件：
 
-### 命令定义
+### 插件加载机制
 
-每个命令都是一个`CommandPlugin`对象，包含以下属性：
+插件系统支持两种方式加载插件：
 
-- `command`: 命令名称（不带斜杠）
-- `description`: 命令描述
-- `handler`: 命令处理函数
-- `category`: 命令分类（MAIN/USER/SYSTEM/TOOLS）
-- `required_role`: 所需权限（USER/ADMIN）
-- `is_visible`: 是否在帮助中显示
+1. **内置插件**：存放在`src/bot/plugins`目录中的插件，与代码一起打包
+2. **外部插件**：存放在以下位置的`plugins`目录中的插件
+   - 项目根目录下的`plugins`目录
+   - 可执行文件所在目录下的`plugins`目录 (`/opt/telegram-bot-template/plugins`)
+   - 当前工作目录下的`plugins`目录
 
-### 添加新命令
+系统会先加载内置插件，然后尝试加载外部插件。如果发现同名插件，将优先使用内置插件。
 
-1. 在`src/bot/handlers/`目录下创建新的命令处理文件
-2. 实现命令处理函数和命令注册函数
-3. 在`src/bot/handlers/__init__.py`的`modules`列表中添加模块引用
+### 插件配置
 
-示例：
+在`config.yaml`中可以控制插件的加载：
+
+```yaml
+plugins:
+  # 启用的插件列表，如果为空，则加载所有未被禁用的插件
+  enabled: ["menu", "start"]  # 只启用这些插件
+  
+  # 禁用的插件列表，这些插件将不会被加载
+  disabled: ["ip"]  # 禁用IP插件
+```
+
+加载优先级规则：
+1. 禁用列表（disabled）优先级最高，在此列表中的插件不会被加载
+2. 启用列表（enabled）优先级次之，仅加载此列表中的插件
+3. 若未配置上述两个列表，则加载所有可用插件
+
+### 添加新插件
+
+#### 内置插件
+
+1. 在`src/bot/plugins`目录下创建新的Python文件
+2. 创建一个继承自`PluginInterface`的插件类
+3. 实现必要的方法，特别是`register_commands`
+
+#### 外部插件
+
+1. 在`/opt/telegram-bot-template/plugins`目录下创建新的Python文件
+2. 创建一个继承自`PluginInterface`的插件类
+3. 实现必要的方法，特别是`register_commands`
+
+#### 插件类模板
+
 ```python
-# my_command.py
 from telegram import Update
 from telegram.ext import ContextTypes
 
 from src.auth import UserManager, UserRole
-from src.bot.handlers.command import CommandPlugin, CommandCategory, CommandRegistry
+from src.bot.plugins.interface import PluginInterface, CommandInfo, CommandCategory
+from src.logger import logger
 
-async def my_command(update: Update, context: ContextTypes.DEFAULT_TYPE, user_manager: UserManager):
-    # 命令处理逻辑
-    await update.message.reply_text("这是我的自定义命令!")
-
-def register_my_command(command_registry: CommandRegistry):
-    command_registry.register_command(
-        CommandPlugin(
-            command="mycommand",
-            description="我的自定义命令",
-            handler=my_command,
-            category=CommandCategory.TOOLS,
-            required_role=UserRole.USER
+class ExamplePlugin(PluginInterface):
+    """示例插件"""
+    name = "example"  # 插件名称（唯一标识符）
+    description = "示例插件"  # 插件描述
+    version = "1.0.0"  # 插件版本
+    
+    def register_commands(self) -> None:
+        """注册命令到插件"""
+        self.register_command(
+            CommandInfo(
+                command="example",  # 命令名称（不含/）
+                description="示例命令",  # 命令描述
+                handler=self.example_command,  # 命令处理函数
+                category=CommandCategory.TOOLS,  # 命令分类
+                required_role=UserRole.USER  # 所需权限级别
+            )
         )
-    )
+    
+    async def example_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE, user_manager: UserManager):
+        """示例命令处理函数"""
+        await update.message.reply_text("这是一个示例命令")
 ```
 
-然后在`__init__.py`中添加：
-```python
-from . import start, help, admin, status, user, menu, my_command
+### 命令分类
 
-# ...
+命令可以按以下分类组织：
 
-def auto_register_commands(command_registry: CommandRegistry) -> None:
-    modules = [start, help, admin, status, user, menu, my_command]
-    # ...
-```
-
-### 命令配置
-
-可以在`config/commands.yaml`中覆盖命令的默认设置：
-
-```yaml
-commands:
-  mycommand:
-    description: "自定义命令的新描述"
-    category: TOOLS
-    required_role: USER
-    is_visible: true
-```
+- `CommandCategory.MAIN`: 主菜单
+- `CommandCategory.MENU`: 菜单管理
+- `CommandCategory.USER`: 用户管理
+- `CommandCategory.SYSTEM`: 系统管理
+- `CommandCategory.TOOLS`: 实用工具
+- `CommandCategory.STATS`: 统计分析
 
 ## 自动构建
 
@@ -244,6 +280,12 @@ commands:
 ### 3. 如何添加用户？
 有两种方式：
 1. 通过用户ID添加: `/adduser <用户ID>`
+
+### 4. 如何开发新的插件？
+1. 在`/opt/telegram-bot-template/plugins`目录下创建新的Python文件
+2. 参考插件类模板创建自己的插件
+3. 实现`register_commands`方法注册命令
+4. 重启机器人：`systemctl restart telegram-bot-template`
 
 ## 效果展示
 
