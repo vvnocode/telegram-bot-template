@@ -25,7 +25,7 @@ class IPPlugin(PluginInterface):
                 description="查看当前IP地址",
                 handler=self.check_ip_command,
                 category=CommandCategory.TOOLS,
-                required_role=UserRole.ADMIN
+                required_role=UserRole.USER
             )
         )
     
