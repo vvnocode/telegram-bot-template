@@ -11,6 +11,7 @@ pyinstaller --onefile \
     --add-data "config/commands.yaml.example:." \
     --hidden-import telegram \
     --hidden-import yaml \
+    --hidden-import src.push.plugins \
     --paths src \
     src/main.py
 

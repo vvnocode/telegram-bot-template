@@ -45,16 +45,37 @@ class PushManager:
         try:
             logger.info("加载内置推送插件...")
             
-            # 方法1：尝试直接导入已知的内置推送插件模块
+            # 方法1：通过plugins包的__all__属性动态发现插件
             try:
-                # 直接导入内置推送插件
-                from src.push.plugins import ip_monitor, system_monitor
+                import src.push.plugins as plugins_package
                 
-                internal_modules = [ip_monitor, system_monitor]
-                for module in internal_modules:
-                    self._register_plugins_from_module(module)
+                # 获取plugins包中导出的所有插件类名
+                plugin_names = getattr(plugins_package, '__all__', [])
+                
+                for plugin_name in plugin_names:
+                    try:
+                        plugin_class = getattr(plugins_package, plugin_name)
+                        if (inspect.isclass(plugin_class) and 
+                            issubclass(plugin_class, PushPluginInterface) and 
+                            plugin_class is not PushPluginInterface):
+                            
+                            plugin_factory.register_plugin(plugin_class)
+                            logger.info(f"成功注册推送插件: {plugin_class.name} ({plugin_class.__name__})")
+                    except Exception as e:
+                        logger.warning(f"注册推送插件 {plugin_name} 失败: {str(e)}")
+                        
             except ImportError as e:
-                logger.warning(f"导入内置推送插件模块失败: {str(e)}")
+                logger.warning(f"导入推送插件包失败: {str(e)}")
+                
+                # 方法2：备用方案，直接导入已知插件（兼容性）
+                try:
+                    from src.push.plugins import ip_monitor, system_monitor
+                    
+                    internal_modules = [ip_monitor, system_monitor]
+                    for module in internal_modules:
+                        self._register_plugins_from_module(module)
+                except ImportError as backup_e:
+                    logger.error(f"备用插件导入也失败: {str(backup_e)}")
         
         except Exception as e:
             logger.error(f"发现内部推送插件时出错: {str(e)}", exc_info=True)
