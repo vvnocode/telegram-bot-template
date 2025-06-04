@@ -3,9 +3,13 @@ telegram_bot_token: "YOUR_BOT_TOKEN_HERE"  # 你的Telegram Bot Token
 telegram_admin_id: "ADMIN_ID_1,ADMIN_ID_2" # 管理员用户ID, 多个用户ID用逗号分隔
 telegram_user_id: "USER_ID_1,USER_ID_2"    # 授权的普通用户ID, 多个用户ID用逗号分隔
 
-# 获取前IP，返回ip地址。配置多个当一个失败时，会自动切换到下一个。
-get_ip_cmd: 
-  - 'curl -s api-ipv4.ip.sb/ip'
+# IP获取API URL列表（优先使用，Python内置urllib）
+get_ip_urls:
+  - 'https://api.ipify.org'
+  - 'https://checkip.amazonaws.com'
+  - 'https://ipv4.icanhazip.com'
+  - 'https://api-ipv4.ip.sb/ip'
+  - 'https://ipinfo.io/ip'
 
 # # 插件配置
 # plugins:

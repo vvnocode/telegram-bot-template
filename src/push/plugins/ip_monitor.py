@@ -9,8 +9,7 @@ from typing import Optional, Dict, Any
 from src.auth import UserManager, UserRole
 from src.push.interface import PushPluginInterface, PushConfig, PushFrequency
 from src.logger import logger
-from src.config import config
-
+from src.utils.ip_utils import IPUtils
 
 class IPMonitorPushPlugin(PushPluginInterface):
     """IP地址监控推送插件，当IP地址发生变化时推送通知"""
@@ -84,17 +83,11 @@ class IPMonitorPushPlugin(PushPluginInterface):
         Returns:
             Optional[str]: 当前IP地址，获取失败时返回None
         """
-        ip_config = config.get('get_ip_cmd', ['curl -s api-ipv4.ip.sb/ip'])
-        
-        for cmd in ip_config:
-            try:
-                result = subprocess.check_output(cmd, shell=True, text=True, timeout=10).strip()
-                if result and self._is_valid_ip(result):
-                    return result
-            except Exception as e:
-                logger.warning(f"IP监控: IP检查命令失败: {cmd}, 错误: {str(e)}")
-        
-        return None
+        try:
+            return IPUtils.get_current_ip()
+        except Exception as e:
+            logger.error(f"IP监控: 调用IP工具失败: {str(e)}")
+            return None
     
     def _is_valid_ip(self, ip: str) -> bool:
         """验证IP地址格式
@@ -207,4 +200,4 @@ class IPMonitorPushPlugin(PushPluginInterface):
 🤖 *来自IP监控系统的自动推送*"""
             
         else:
-            return f"�� IP监控: {str(data)}" 
+            return f"📡 IP监控: {str(data)}"

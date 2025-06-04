@@ -1,5 +1,4 @@
 """IP工具插件"""
-import subprocess
 from typing import Dict, Any
 
 from telegram import Update
@@ -8,7 +7,7 @@ from telegram.ext import ContextTypes
 from src.auth import UserManager, UserRole
 from src.bot.plugins.interface import PluginInterface, CommandInfo, CommandCategory
 from src.logger import logger
-from src.config import config
+from src.utils.ip_utils import IPUtils
 
 
 class IPPlugin(PluginInterface):
@@ -35,17 +34,7 @@ class IPPlugin(PluginInterface):
         Returns:
             str: 当前IP地址
         """
-        ip_config = config.get('get_ip_cmd', ['curl -s api-ipv4.ip.sb/ip'])
-        
-        for cmd in ip_config:
-            try:
-                result = subprocess.check_output(cmd, shell=True, text=True).strip()
-                if result:
-                    return result
-            except Exception as e:
-                logger.error(f"IP检查命令失败: {cmd}, 错误: {str(e)}")
-        
-        return "无法获取IP"
+        return IPUtils.get_current_ip_with_fallback()
     
     async def check_ip_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE, user_manager: UserManager):
         """查看当前IP命令处理器
