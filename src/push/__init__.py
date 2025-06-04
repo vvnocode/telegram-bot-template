@@ -1,4 +1,14 @@
-from .manager import PushManager
-from .interface import PushPluginInterface
+"""推送模块"""
 
-__all__ = ['PushManager', 'PushPluginInterface'] 
+from .interface import PushPluginInterface, PushConfig, PushFrequency
+from .manager import PushManager
+from .factory import PushPluginFactory, plugin_factory
+
+__all__ = [
+    'PushPluginInterface',
+    'PushConfig', 
+    'PushFrequency',
+    'PushManager',
+    'PushPluginFactory',
+    'plugin_factory'
+] 

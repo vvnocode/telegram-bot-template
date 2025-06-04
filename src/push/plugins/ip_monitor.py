@@ -2,11 +2,12 @@
 import subprocess
 import json
 import os
+import ipaddress
 from datetime import datetime
 from typing import Optional, Dict, Any
 
-from src.auth import UserManager
-from src.push.interface import PushPluginInterface, PushConfig
+from src.auth import UserManager, UserRole
+from src.push.interface import PushPluginInterface, PushConfig, PushFrequency
 from src.logger import logger
 from src.config import config
 
@@ -17,14 +18,24 @@ class IPMonitorPushPlugin(PushPluginInterface):
     description = "IP地址变化监控推送"
     version = "1.0.0"
     
-    def __init__(self, user_manager: UserManager, push_config: PushConfig = None):
+    def __init__(self, user_manager: UserManager, default_config: PushConfig = None):
         """初始化IP监控推送插件
         
         Args:
             user_manager: 用户管理器
-            push_config: 推送配置
+            default_config: 默认配置，如果为None则使用插件自定义默认配置
         """
-        super().__init__(user_manager, push_config)
+        # 如果没有传入默认配置，创建插件的自定义默认配置
+        if default_config is None:
+            default_config = PushConfig(
+                enabled=True,
+                frequency=PushFrequency.INTERVAL,
+                interval_seconds=300,  # 5分钟检查一次
+                target_role=UserRole.USER,
+                custom_targets=[]
+            )
+        
+        super().__init__(user_manager, default_config)
         
         # IP状态文件路径
         self.ip_state_file = os.path.join('data', 'records', 'ip_monitor_state.json')
@@ -94,7 +105,6 @@ class IPMonitorPushPlugin(PushPluginInterface):
         Returns:
             bool: 是否为有效IP地址
         """
-        import ipaddress
         try:
             ipaddress.ip_address(ip)
             return True
@@ -177,7 +187,7 @@ class IPMonitorPushPlugin(PushPluginInterface):
         
         # 如果是IP变化信息
         if isinstance(data, dict) and 'old_ip' in data:
-            message = f"""🔄 **IP地址发生变化**
+            return f"""🔄 **IP地址发生变化**
 
 📍 **旧IP地址**: `{data['old_ip']}`
 📍 **新IP地址**: `{data['new_ip']}`
@@ -189,7 +199,7 @@ class IPMonitorPushPlugin(PushPluginInterface):
             
         # 如果是当前IP信息  
         elif isinstance(data, dict) and 'ip' in data:
-            message = f"""📡 **当前IP地址信息**
+            return f"""📡 **当前IP地址信息**
 
 📍 **IP地址**: `{data['ip']}`
 ⏰ **检查时间**: {data['check_time']}
@@ -197,6 +207,4 @@ class IPMonitorPushPlugin(PushPluginInterface):
 🤖 *来自IP监控系统的自动推送*"""
             
         else:
-            message = f"📡 IP监控: {str(data)}"
-        
-        return message 
+            return f"�� IP监控: {str(data)}" 

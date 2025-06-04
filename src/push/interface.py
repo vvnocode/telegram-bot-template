@@ -42,21 +42,16 @@ class PushPluginInterface(ABC):
     description: ClassVar[str] = "基础推送插件"
     version: ClassVar[str] = "1.0.0"
     
-    # 默认推送配置，子类应该覆盖这些属性
-    default_enabled: ClassVar[bool] = True
-    default_frequency: ClassVar[PushFrequency] = PushFrequency.EVENT
-    default_interval_seconds: ClassVar[int] = 300
-    default_target_role: ClassVar[UserRole] = UserRole.ADMIN
-    
-    def __init__(self, user_manager: UserManager, config: PushConfig):
+    def __init__(self, user_manager: UserManager, default_config: PushConfig = None):
         """初始化推送插件
         
         Args:
             user_manager: 用户管理器
-            config: 推送配置对象
+            default_config: 默认配置，如果为None则使用基础默认配置
         """
         self.user_manager = user_manager
-        self.config = config
+        # 使用传入的默认配置，如果没有则创建基础默认配置
+        self.config = default_config if default_config is not None else PushConfig()
         self._task: Optional[asyncio.Task] = None
         self._app: Optional[Application] = None
         self._is_running = False
@@ -70,6 +65,43 @@ class PushPluginInterface(ABC):
     def is_running(self) -> bool:
         """获取插件是否正在运行"""
         return self._is_running
+    
+    def configure(self, config_data: Dict[str, Any]) -> None:
+        """配置插件，用配置文件中的值覆盖默认配置
+        
+        Args:
+            config_data: 配置数据字典
+        """
+        # 只覆盖配置文件中明确指定的值，保留其他默认值
+        if 'enabled' in config_data:
+            self.config.enabled = config_data['enabled']
+        
+        # 解析频率
+        if 'frequency' in config_data:
+            frequency_str = config_data['frequency']
+            try:
+                self.config.frequency = PushFrequency(frequency_str)
+            except ValueError:
+                logger.warning(f"推送插件 {self.name}: 无效的推送频率 {frequency_str}，保持默认值 {self.config.frequency.value}")
+        
+        if 'interval_seconds' in config_data:
+            self.config.interval_seconds = config_data['interval_seconds']
+            
+        if 'cron_expression' in config_data:
+            self.config.cron_expression = config_data['cron_expression']
+        
+        # 解析目标角色
+        if 'target_role' in config_data:
+            role_name = config_data['target_role'].lower()
+            if role_name == 'admin':
+                self.config.target_role = UserRole.ADMIN
+            elif role_name == 'user':
+                self.config.target_role = UserRole.USER
+            else:
+                logger.warning(f"推送插件 {self.name}: 未知的用户角色 {role_name}，保持默认值 {self.config.target_role.name}")
+        
+        if 'custom_targets' in config_data:
+            self.config.custom_targets = config_data['custom_targets']
     
     @abstractmethod
     async def check_condition(self) -> tuple[bool, Optional[str]]:
@@ -104,13 +136,10 @@ class PushPluginInterface(ABC):
         
         # 根据角色获取用户
         if self.config.target_role == UserRole.ADMIN:
-            # 仅管理员
             return await self.user_manager.get_admin_user_ids()
         elif self.config.target_role == UserRole.USER:
-            # 所有用户（管理员+普通用户）
             return await self.user_manager.get_all_user_ids()
         else:
-            # 默认情况
             logger.warning(f"推送插件 {self.name}: 未知的目标角色 {self.config.target_role}，默认推送给管理员")
             return await self.user_manager.get_admin_user_ids()
     
@@ -172,11 +201,9 @@ class PushPluginInterface(ABC):
         # 根据频率类型启动不同的任务
         if self.config.frequency == PushFrequency.INTERVAL:
             self._task = asyncio.create_task(self._interval_task())
-        elif self.config.frequency == PushFrequency.EVENT:
-            # 事件驱动模式，由外部调用trigger_check
-            pass
         elif self.config.frequency == PushFrequency.ONCE:
             self._task = asyncio.create_task(self._once_task())
+        # EVENT模式不需要启动任务，由外部触发
         
         logger.info(f"推送插件 {self.name} 已启动，频率: {self.config.frequency.value}")
     
