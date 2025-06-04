@@ -6,6 +6,7 @@ from src.auth import UserManager
 from src.logger import logger
 from src.utils import UserStatsManager
 from src.bot.plugins.loader import PluginLoader
+from src.push.manager import PushManager
 
 class TelegramBot:
     """Telegram机器人核心类"""
@@ -19,6 +20,7 @@ class TelegramBot:
         self.user_manager = UserManager(config)
         self.stats_manager = UserStatsManager()
         self.plugin_loader = PluginLoader(self.user_manager, config)
+        self.push_manager = PushManager(self.user_manager, config)
         self.app = None
         
     def setup(self) -> None:
@@ -28,8 +30,9 @@ class TelegramBot:
         # 创建应用实例
         self.app = ApplicationBuilder().token(self.config["telegram_bot_token"]).build()
         
-        # 添加统计管理器到应用数据
+        # 添加管理器到应用数据
         self.app.bot_data['stats_manager'] = self.stats_manager
+        self.app.bot_data['push_manager'] = self.push_manager
         
         # 加载并设置插件
         self.plugin_loader.setup_plugins(self.app)
@@ -43,13 +46,26 @@ class TelegramBot:
             
         logger.info("机器人开始运行...")
         
-        # 设置启动后的命令菜单
+        # 设置启动后的处理
         async def post_init(application: Application):
-            logger.info("应用启动后设置命令菜单")
+            logger.info("应用启动后设置...")
+            
+            # 设置命令菜单
             await self.plugin_loader.setup_bot_commands(application)
+            
+            # 启动推送管理器
+            await self.push_manager.start_all_plugins(application)
         
-        # 注册应用启动处理器
+        # 设置停止时的处理
+        async def post_shutdown(application: Application):
+            logger.info("应用停止时清理...")
+            
+            # 停止推送管理器
+            await self.push_manager.stop_all_plugins()
+        
+        # 注册应用处理器
         self.app.post_init = post_init
+        self.app.post_shutdown = post_shutdown
         
         # 开始轮询
         self.app.run_polling()

@@ -18,6 +18,7 @@ class CommandCategory(Enum):
     SYSTEM = "系统管理"
     TOOLS = "实用工具"
     STATS = "统计分析"
+    PUSH = "推送管理"
 
 
 @dataclass

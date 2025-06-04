@@ -50,9 +50,9 @@ class PluginLoader:
             # 方法1：尝试直接导入已知的内置插件模块
             try:
                 # 直接导入内置插件
-                from src.bot.plugins import menu, start, ip, stats, user
+                from src.bot.plugins import menu, start, ip, stats, user, push_control
                 
-                internal_modules = [menu, start, ip, stats, user]
+                internal_modules = [menu, start, ip, stats, user, push_control]
                 for module in internal_modules:
                     self._register_plugins_from_module(module, "内置")
             except ImportError as e:

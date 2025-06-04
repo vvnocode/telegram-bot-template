@@ -157,4 +157,42 @@ class UserManager:
             return True
         except Exception as e:
             logger.error(f"保存用户配置失败: {str(e)}", exc_info=True)
-            return False 
+            return False
+    
+    async def get_admin_user_ids(self) -> List[int]:
+        """获取所有管理员用户ID列表（用于推送系统）
+        
+        Returns:
+            List[int]: 管理员用户ID列表
+        """
+        try:
+            return [int(admin_id) for admin_id in self.admin_ids if admin_id.isdigit()]
+        except Exception as e:
+            logger.error(f"获取管理员用户ID列表失败: {str(e)}")
+            return []
+    
+    async def get_all_user_ids(self) -> List[int]:
+        """获取所有用户ID列表（包括管理员和普通用户，用于推送系统）
+        
+        Returns:
+            List[int]: 所有用户ID列表
+        """
+        try:
+            all_ids = []
+            
+            # 添加管理员ID
+            for admin_id in self.admin_ids:
+                if admin_id.isdigit():
+                    all_ids.append(int(admin_id))
+            
+            # 添加普通用户ID
+            for user_id in self.allowed_user_ids:
+                if user_id.isdigit():
+                    user_id_int = int(user_id)
+                    if user_id_int not in all_ids:  # 避免重复
+                        all_ids.append(user_id_int)
+            
+            return all_ids
+        except Exception as e:
+            logger.error(f"获取所有用户ID列表失败: {str(e)}")
+            return [] 

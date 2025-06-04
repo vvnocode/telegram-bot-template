@@ -7,10 +7,25 @@ telegram_user_id: "USER_ID_1,USER_ID_2"    # 授权的普通用户ID, 多个用�
 get_ip_cmd: 
   - 'curl -s api-ipv4.ip.sb/ip'
 
-  # 插件配置
+# # 插件配置
 # plugins:
   # 启用的插件列表，如果为空，则加载所有未被禁用的插件
   # enabled: ["start"]
   
   # 禁用的插件列表，这些插件将不会被加载
   # disabled: []
+
+# # 推送系统配置
+# push:
+#   # 启用的推送插件列表（为空则加载所有）
+#   enabled: []
+#   # 禁用的推送插件列表
+#   disabled: []
+#   # 插件特定配置
+#   plugins:
+#     ip_monitor:
+#       enabled: true
+#       frequency: interval  # event, interval, once, cron
+#       interval_seconds: 300  # 5分钟检查一次
+#       target_role: admin  # admin=仅管理员, user=所有用户（管理员+普通用户）
+#       custom_targets: []  # 自定义目标用户ID列表（优先级高于target_role）

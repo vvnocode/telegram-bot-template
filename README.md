@@ -11,6 +11,7 @@
 - 🔌 **动态插件加载** - 支持从内部和外部目录加载插件
 - ⚙️ **配置文件支持** - 通过YAML配置文件控制插件的启用与禁用
 - 🖥️ **系统状态监控** - 查看机器人运行状态、系统资源使用情况
+- 📡 **主动推送系统** - 插件式推送框架，支持IP监控等自动通知功能
 - 🔧 **简单易用的API** - 清晰的接口设计，便于扩展
 
 ## 使用
@@ -45,19 +46,32 @@ plugins:
 
 ### Telegram Bot 命令
 
+#### 基础命令
 - `/start` - 机器人使用入口
 - `/help` - 显示帮助信息
 - `/menu` - 查看所有可用命令及权限
-- `/users` - 查看所有用户列表(需管理员权限)
-- `/adduser` - 添加普通用户(需管理员权限)
-- `/deluser` - 删除普通用户(需管理员权限)
+
+#### 用户管理命令 (管理员权限)
+- `/users` - 查看所有用户列表
+- `/adduser` - 添加普通用户
+- `/deluser` - 删除普通用户
+
+#### 系统命令
 - `/status` - 查看系统状态(需管理员权限)
 - `/get_ip` - 查看当前IP地址
-- `/stats_total` - 显示所有命令的总体使用统计(需管理员权限)
-- `/stats_today` - 显示所有命令的今日使用统计(需管理员权限)
-- `/stats_users_total` - 显示所有用户的各菜单使用详情统计(需管理员权限)
-- `/stats_users_today` - 显示所有用户的今日各菜单使用详情(需管理员权限)
-- `/stats_user` - 显示指定用户的统计信息(需管理员权限)
+
+#### 统计命令 (管理员权限)
+- `/stats_total` - 显示所有命令的总体使用统计
+- `/stats_today` - 显示所有命令的今日使用统计
+- `/stats_users_total` - 显示所有用户的各菜单使用详情统计
+- `/stats_users_today` - 显示所有用户的今日各菜单使用详情
+- `/stats_user` - 显示指定用户的统计信息
+
+#### 推送系统命令 (管理员权限)
+- `/push_status` - 查看推送系统状态
+- `/push_list` - 列出所有推送插件
+- `/push_trigger <插件名>` - 手动触发指定推送插件
+- `/push_trigger_all` - 手动触发所有推送插件
 
 ### 服务管理
 
@@ -122,10 +136,19 @@ telegram-bot-template/
 │   │   │   ├── user.py       # 用户管理插件
 │   │   │   ├── stats.py      # 统计插件
 │   │   │   ├── ip.py         # IP工具插件
+│   │   │   ├── push_control.py # 推送控制插件
 │   │   │   └── README.md     # 插件开发文档
 │   │   └── utils/            # 机器人工具函数
 │   │       ├── __init__.py
 │   │       └── message_helper.py # 消息处理助手
+│   ├── push/                 # 推送系统
+│   │   ├── __init__.py
+│   │   ├── interface.py      # 推送插件接口
+│   │   ├── manager.py        # 推送管理器
+│   │   ├── plugins/          # 推送插件目录
+│   │   │   ├── __init__.py
+│   │   │   └── ip_monitor.py # IP监控推送插件
+│   │   └── README.md         # 推送系统文档
 │   ├── auth/                 # 用户认证模块
 │   │   ├── __init__.py
 │   │   ├── permissions.py    # 权限定义
@@ -254,6 +277,118 @@ class ExamplePlugin(PluginInterface):
 - `CommandCategory.SYSTEM`: 系统管理
 - `CommandCategory.TOOLS`: 实用工具
 - `CommandCategory.STATS`: 统计分析
+
+## 推送系统
+
+本机器人集成了强大的推送系统，支持主动向用户发送各种类型的通知和监控信息。
+
+### 主要特性
+
+- 🔧 **插件式架构**: 支持自定义推送插件
+- 🎯 **权限控制**: 支持管理员和普通用户权限区分
+- ⏰ **多种推送频率**: 支持事件驱动、定时间隔、一次性等模式
+- 👥 **灵活的目标管理**: 可配置推送给管理员、所有用户或自定义用户列表
+- 🔄 **动态管理**: 支持运行时启动、停止和手动触发
+
+### 推送频率类型
+
+- **EVENT**: 事件驱动，需要外部调用trigger_check()
+- **INTERVAL**: 定时间隔，按设定的秒数间隔执行
+- **ONCE**: 一次性执行，启动后执行一次
+- **CRON**: 定时任务（暂未实现）
+
+### 配置推送系统
+
+在 `config.yaml` 中配置推送系统：
+
+```yaml
+# 推送系统配置
+push:
+  # 启用的推送插件列表（为空则加载所有）
+  enabled: []
+  # 禁用的推送插件列表
+  disabled: []
+  # 插件特定配置
+  plugins:
+    ip_monitor:
+      enabled: true
+      frequency: interval  # event, interval, once, cron
+      interval_seconds: 300  # 5分钟检查一次
+      target_admin_only: true
+      custom_targets: []  # 自定义目标用户ID列表
+```
+
+### 内置推送插件
+
+#### IP监控插件 (ip_monitor)
+
+监控服务器IP地址变化，当检测到IP变化时向管理员推送通知。
+
+**功能特性:**
+- 📍 检测IP地址变化
+- 💾 持久化IP状态到文件
+- 🔍 首次启动时发送当前IP信息
+- ✅ IP地址格式验证
+
+**使用示例:**
+```yaml
+plugins:
+  ip_monitor:
+    enabled: true
+    frequency: interval
+    interval_seconds: 300  # 5分钟检查一次
+    target_admin_only: true
+```
+
+### 推送管理命令
+
+管理员可以使用以下命令管理推送系统：
+
+- `/push_status` - 查看推送系统状态
+- `/push_list` - 列出所有推送插件
+- `/push_trigger <插件名>` - 手动触发指定推送插件
+- `/push_trigger_all` - 手动触发所有推送插件
+
+### 开发自定义推送插件
+
+创建自定义推送插件的步骤：
+
+```python
+from src.push.interface import PushPluginInterface, PushConfig
+from src.auth import UserManager
+
+class MyPushPlugin(PushPluginInterface):
+    name = "my_plugin"
+    description = "我的推送插件"
+    version = "1.0.0"
+    
+    def __init__(self, user_manager: UserManager, config: PushConfig = None):
+        super().__init__(user_manager, config)
+        # 初始化插件特定的属性
+    
+    async def check_condition(self) -> tuple[bool, Optional[str]]:
+        """检查是否需要推送"""
+        # 实现检查逻辑
+        should_push = False  # 根据条件判断
+        message = None       # 推送消息内容
+        return should_push, message
+    
+    def get_message(self, data: Any = None) -> str:
+        """生成推送消息"""
+        return "推送消息内容"
+```
+
+将插件文件放在 `src/push/plugins/` 目录下，系统会自动发现并加载。
+
+### 推送目标配置
+
+推送插件支持灵活的目标用户配置：
+
+1. **仅管理员**: `target_admin_only: true`
+2. **所有用户**: `target_admin_only: false`
+3. **自定义用户**: 通过 `custom_targets` 指定用户ID列表
+
+更多详细信息请参考 [推送系统文档](src/push/README.md)。
 
 ## 自动构建
 
