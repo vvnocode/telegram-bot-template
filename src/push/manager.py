@@ -45,17 +45,17 @@ class PushManager:
         try:
             logger.info("加载内置推送插件...")
             
-            # 扫描推送插件目录
-            plugins_dir = os.path.join(os.path.dirname(__file__), 'plugins')
-            if os.path.exists(plugins_dir):
-                for filename in os.listdir(plugins_dir):
-                    if filename.endswith('.py') and filename != '__init__.py':
-                        module_name = filename[:-3]
-                        try:
-                            module = importlib.import_module(f'src.push.plugins.{module_name}')
-                            self._register_plugins_from_module(module)
-                        except ImportError as e:
-                            logger.warning(f"导入推送插件模块失败: {module_name}, 错误: {str(e)}")
+            # 方法1：尝试直接导入已知的内置推送插件模块
+            try:
+                # 直接导入内置推送插件
+                from src.push.plugins import ip_monitor, system_monitor
+                
+                internal_modules = [ip_monitor, system_monitor]
+                for module in internal_modules:
+                    self._register_plugins_from_module(module)
+            except ImportError as e:
+                logger.warning(f"导入内置推送插件模块失败: {str(e)}")
+        
         except Exception as e:
             logger.error(f"发现内部推送插件时出错: {str(e)}", exc_info=True)
     
