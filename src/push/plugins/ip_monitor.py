@@ -73,7 +73,7 @@ class IPMonitorPushPlugin(PushPluginInterface):
             
             with open(self.ip_state_file, 'w', encoding='utf-8') as f:
                 json.dump(ip_info, f, ensure_ascii=False, indent=2)
-            logger.info(f"IP监控: 保存IP状态 - {ip_info}")
+            logger.debug(f"IP监控: 保存IP状态 - {ip_info}")
         except Exception as e:
             logger.error(f"IP监控: 保存IP状态文件失败: {str(e)}")
     

@@ -64,12 +64,12 @@ class HTTPUtils:
                     req.add_header(key, value)
             
             # 发送请求
-            logger.info(f"HTTP工具: 发送{method}请求到 {url}")
+            logger.debug(f"HTTP工具: 发送{method}请求到 {url}")
             with urllib.request.urlopen(req, timeout=timeout) as response:
                 response_data = response.read().decode('utf-8')
                 status_code = response.status
                 
-                logger.info(f"HTTP工具: 请求成功，状态码: {status_code}")
+                logger.debug(f"HTTP工具: 请求成功，状态码: {status_code}")
                 
                 if 200 <= status_code < 300:
                     return True, response_data
