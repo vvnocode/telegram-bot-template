@@ -10,7 +10,7 @@ class UserUtils:
     """用户相关工具类"""
     
     @staticmethod
-    async def get_user_display_name(user_id: int, context: ContextTypes.DEFAULT_TYPE = None) -> str:
+    async def get_user_display_name(user_id: any, context: ContextTypes.DEFAULT_TYPE = None) -> str:
         """获取用户显示名称（昵称或ID）
         
         Args:
@@ -20,6 +20,12 @@ class UserUtils:
         Returns:
             str: 用户显示名称，格式为 "昵称 (`用户ID`)" 或 "`用户ID`"
         """
+        if not isinstance(user_id, int):
+            try:
+                user_id = int(user_id)
+            except ValueError:
+                return f"`{user_id}`"
+        
         # 优先从缓存获取
         cached_name = user_cache.get_user_display_name(user_id)
         if cached_name != f"`{user_id}`":  # 如果缓存中有昵称信息
@@ -53,7 +59,7 @@ class UserUtils:
         return f"`{user_id}`"
     
     @staticmethod
-    async def get_user_simple_name(user_id: int, context: ContextTypes.DEFAULT_TYPE = None) -> str:
+    async def get_user_simple_name(user_id: any, context: ContextTypes.DEFAULT_TYPE = None) -> str:
         """获取用户简单显示名称（仅昵称，不包含ID）
         
         Args:
@@ -63,6 +69,12 @@ class UserUtils:
         Returns:
             str: 用户简单显示名称，如果获取失败则返回用户ID字符串
         """
+        if not isinstance(user_id, int):
+            try:
+                user_id = int(user_id)
+            except ValueError:
+                return f"`{user_id}`"
+        
         # 优先从缓存获取
         cached_name = user_cache.get_user_simple_name(user_id)
         if cached_name != str(user_id):  # 如果缓存中有昵称信息
@@ -96,7 +108,7 @@ class UserUtils:
         return str(user_id)
     
     @staticmethod
-    async def get_user_info(user_id: int, context: ContextTypes.DEFAULT_TYPE = None) -> Optional[dict]:
+    async def get_user_info(user_id: any, context: ContextTypes.DEFAULT_TYPE = None) -> Optional[dict]:
         """获取用户完整信息
         
         Args:
@@ -106,6 +118,12 @@ class UserUtils:
         Returns:
             Optional[dict]: 用户信息字典，获取失败时返回None
         """
+        if not isinstance(user_id, int):
+            try:
+                user_id = int(user_id)
+            except ValueError:
+                return None
+        
         # 先尝试从缓存获取
         cached_info = user_cache.get_user_info(user_id)
         if cached_info:

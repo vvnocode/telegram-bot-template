@@ -5,6 +5,7 @@ from telegram.ext import ContextTypes
 from src.auth import UserManager, UserRole
 from src.bot.plugins.interface import PluginInterface, CommandInfo, CommandCategory
 from src.logger import logger
+from src.utils.user_utils import UserUtils
 
 
 class UserPlugin(PluginInterface):
@@ -72,14 +73,16 @@ class UserPlugin(PluginInterface):
             message += "  _无管理员用户_\n"
         else:
             for i, admin_id in enumerate(users['admins'], 1):
-                message += f"  {i}. `{admin_id}`\n"
+                user_display_name = await UserUtils.get_user_display_name(int(admin_id), context)
+                message += f"  {i}. {user_display_name}\n"
         
         message += "\n*👤 普通用户:*\n"
         if not users['users']:
             message += "  _无普通用户_\n"
         else:
             for i, user_id in enumerate(users['users'], 1):
-                message += f"  {i}. `{user_id}`\n"
+                user_display_name = await UserUtils.get_user_display_name(user_id, context)
+                message += f"  {i}. {user_display_name}\n"
         
         # 显示管理命令帮助
         message += "\n*🔧 用户管理命令:*\n"

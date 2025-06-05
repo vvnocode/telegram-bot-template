@@ -8,6 +8,7 @@ from src.auth import UserManager, UserRole
 from src.logger import logger
 from src.bot.plugins.interface import PluginInterface, CommandInfo, CommandCategory
 from src.utils import UserStatsManager
+from src.utils.user_utils import UserUtils
 
 
 class StatsPlugin(PluginInterface):
@@ -123,7 +124,7 @@ class StatsPlugin(PluginInterface):
             return
         
         try:
-            await self.show_users_menu_stats(update, stats_manager, user_manager)
+            await self.show_users_menu_stats(update, stats_manager, user_manager, context)
         except Exception as e:
             logger.error(f"显示用户总体统计时出错: {str(e)}")
             await update.message.reply_text(f"显示统计数据时出错: {str(e)}")
@@ -138,7 +139,7 @@ class StatsPlugin(PluginInterface):
             return
         
         try:
-            await self.show_users_menu_daily_stats(update, stats_manager, user_manager, date.today())
+            await self.show_users_menu_daily_stats(update, stats_manager, user_manager, date.today(), context)
         except Exception as e:
             logger.error(f"显示用户今日统计时出错: {str(e)}")
             await update.message.reply_text(f"显示统计数据时出错: {str(e)}")
@@ -160,7 +161,7 @@ class StatsPlugin(PluginInterface):
             
         user_id = args[0]
         try:
-            await self.show_user_stats(update, stats_manager, user_id)
+            await self.show_user_stats(update, stats_manager, user_id, context)
         except Exception as e:
             logger.error(f"显示指定用户统计时出错: {str(e)}")
             await update.message.reply_text(f"显示统计数据时出错: {str(e)}")
@@ -240,13 +241,14 @@ class StatsPlugin(PluginInterface):
             logger.error(f"使用Markdown格式发送每日统计失败: {str(e)}")
             await update.message.reply_text(message.replace('*', ''), parse_mode=None)
     
-    async def show_user_stats(self, update: Update, stats_manager: UserStatsManager, user_id: str):
+    async def show_user_stats(self, update: Update, stats_manager: UserStatsManager, user_id: str, context: ContextTypes.DEFAULT_TYPE = None):
         """显示用户统计信息
         
         Args:
             update: Telegram更新对象
             stats_manager: 统计管理器实例
             user_id: 用户ID
+            context: Telegram上下文对象（用于获取用户昵称）
         """
         # 获取用户总体统计
         user_total_stats = stats_manager.get_user_total_stats(user_id)
@@ -255,11 +257,13 @@ class StatsPlugin(PluginInterface):
         user_today_stats = stats_manager.get_user_daily_stats(user_id)
         
         if not user_total_stats and not user_today_stats:
-            await update.message.reply_text(f"📊 用户 {user_id} 没有统计数据")
+            user_display_name = await UserUtils.get_user_display_name(user_id, context)
+            await update.message.reply_text(f"📊 {user_display_name} 没有统计数据")
             return
         
         # 构建消息
-        message = f"📊 *用户 {user_id} 的使用统计*\n\n"
+        user_display_name = await UserUtils.get_user_display_name(user_id, context)
+        message = f"📊 *{user_display_name} 的使用统计*\n\n"
         
         # 今日统计
         if user_today_stats:
@@ -287,13 +291,14 @@ class StatsPlugin(PluginInterface):
             logger.error(f"使用Markdown格式发送用户统计失败: {str(e)}")
             await update.message.reply_text(message.replace('*', ''), parse_mode=None)
     
-    async def show_users_menu_stats(self, update: Update, stats_manager: UserStatsManager, user_manager: UserManager):
+    async def show_users_menu_stats(self, update: Update, stats_manager: UserStatsManager, user_manager: UserManager, context: ContextTypes.DEFAULT_TYPE = None):
         """显示所有用户的菜单使用详情（总体统计）
         
         Args:
             update: Telegram更新对象
             stats_manager: 统计管理器实例
             user_manager: 用户管理器实例
+            context: Telegram上下文对象（用于获取用户昵称）
         """
         # 获取所有用户的总体统计
         all_stats = stats_manager.get_all_total_stats()
@@ -319,7 +324,8 @@ class StatsPlugin(PluginInterface):
         # 先显示管理员
         for user_id in admin_ids:
             if user_id in user_menu_stats:
-                message += f"*👑 用户 {user_id}:*\n"
+                user_display_name = await UserUtils.get_user_display_name(user_id, context)
+                message += f"*👑 {user_display_name}:*\n"
                 
                 # 按使用次数对命令排序
                 sorted_commands = sorted(user_menu_stats[user_id].items(), key=lambda x: x[1], reverse=True)
@@ -334,7 +340,8 @@ class StatsPlugin(PluginInterface):
         # 再显示普通用户
         for user_id in normal_user_ids:
             if user_id in user_menu_stats:
-                message += f"*👤 用户 {user_id}:*\n"
+                user_display_name = await UserUtils.get_user_display_name(user_id, context)
+                message += f"*👤 {user_display_name}:*\n"
                 
                 # 按使用次数对命令排序
                 sorted_commands = sorted(user_menu_stats[user_id].items(), key=lambda x: x[1], reverse=True)
@@ -353,7 +360,7 @@ class StatsPlugin(PluginInterface):
             logger.error(f"使用Markdown格式发送菜单统计失败: {str(e)}")
             await update.message.reply_text(message.replace('*', ''), parse_mode=None)
     
-    async def show_users_menu_daily_stats(self, update: Update, stats_manager: UserStatsManager, user_manager: UserManager, day: date):
+    async def show_users_menu_daily_stats(self, update: Update, stats_manager: UserStatsManager, user_manager: UserManager, day: date, context: ContextTypes.DEFAULT_TYPE = None):
         """显示所有用户的菜单使用详情（每日统计）
         
         Args:
@@ -361,6 +368,7 @@ class StatsPlugin(PluginInterface):
             stats_manager: 统计管理器实例
             user_manager: 用户管理器实例
             day: 日期对象
+            context: Telegram上下文对象（用于获取用户昵称）
         """
         # 获取指定日期的统计数据
         all_stats = stats_manager.get_all_daily_stats(day)
@@ -386,7 +394,8 @@ class StatsPlugin(PluginInterface):
         # 先显示管理员
         for user_id in admin_ids:
             if user_id in user_menu_stats:
-                message += f"*👑 用户 {user_id}:*\n"
+                user_display_name = await UserUtils.get_user_display_name(user_id, context)
+                message += f"*👑 {user_display_name}:*\n"
                 
                 # 按使用次数对命令排序
                 sorted_commands = sorted(user_menu_stats[user_id].items(), key=lambda x: x[1], reverse=True)
@@ -401,7 +410,8 @@ class StatsPlugin(PluginInterface):
         # 再显示普通用户
         for user_id in normal_user_ids:
             if user_id in user_menu_stats:
-                message += f"*👤 用户 {user_id}:*\n"
+                user_display_name = await UserUtils.get_user_display_name(user_id, context)
+                message += f"*👤 {user_display_name}:*\n"
                 
                 # 按使用次数对命令排序
                 sorted_commands = sorted(user_menu_stats[user_id].items(), key=lambda x: x[1], reverse=True)
