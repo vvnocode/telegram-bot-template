@@ -23,7 +23,8 @@ class MenuPlugin(PluginInterface):
                 description="查看所有可用命令及权限",
                 handler=self.menu_command,
                 category=CommandCategory.MENU,
-                required_role=UserRole.USER
+                required_role=UserRole.USER,
+                sort=1
             )
         )
     
@@ -72,11 +73,14 @@ class MenuPlugin(PluginInterface):
                     commands_by_category[cmd.category].append(cmd)
         
         # 按分类添加到消息中
-        for category, commands in commands_by_category.items():
-            if commands:
+        # 按照枚举定义的顺序来排序分类
+        for category in CommandCategory:
+            if category in commands_by_category and commands_by_category[category]:
+                commands = commands_by_category[category]
                 menu_message += f"*{category.value}*\n"
                 
-                for cmd in sorted(commands, key=lambda x: x.command):
+                # 按照sort字段排序，然后按照命令名排序
+                for cmd in sorted(commands, key=lambda x: (x.sort, x.command)):
                     # 确定权限标记
                     if cmd.required_role == UserRole.ADMIN:
                         permission_mark = "👑" 

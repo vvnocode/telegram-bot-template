@@ -26,7 +26,8 @@ class StatsPlugin(PluginInterface):
                 handler=self.stats_total_command,
                 category=CommandCategory.STATS,
                 required_role=UserRole.ADMIN,
-                is_visible=True
+                is_visible=True,
+                sort=1
             )
         )
         
@@ -38,7 +39,8 @@ class StatsPlugin(PluginInterface):
                 handler=self.stats_today_command,
                 category=CommandCategory.STATS,
                 required_role=UserRole.ADMIN,
-                is_visible=True
+                is_visible=True,
+                sort=2
             )
         )
         
@@ -50,7 +52,8 @@ class StatsPlugin(PluginInterface):
                 handler=self.stats_users_total_command,
                 category=CommandCategory.STATS,
                 required_role=UserRole.ADMIN,
-                is_visible=True
+                is_visible=True,
+                sort=3
             )
         )
         
@@ -62,7 +65,8 @@ class StatsPlugin(PluginInterface):
                 handler=self.stats_users_today_command,
                 category=CommandCategory.STATS,
                 required_role=UserRole.ADMIN,
-                is_visible=True
+                is_visible=True,
+                sort=4
             )
         )
         
@@ -74,7 +78,8 @@ class StatsPlugin(PluginInterface):
                 handler=self.stats_user_command,
                 category=CommandCategory.STATS,
                 required_role=UserRole.ADMIN,
-                is_visible=True
+                is_visible=True,
+                sort=5
             )
         )
     

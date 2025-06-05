@@ -22,7 +22,8 @@ class UserPlugin(PluginInterface):
                 description="显示所有用户列表",
                 handler=self.user_list_command,
                 category=CommandCategory.USER,
-                required_role=UserRole.ADMIN
+                required_role=UserRole.ADMIN,
+                sort=1
             )
         )
         
@@ -33,7 +34,8 @@ class UserPlugin(PluginInterface):
                 description="添加普通用户",
                 handler=self.add_user_command,
                 category=CommandCategory.USER,
-                required_role=UserRole.ADMIN
+                required_role=UserRole.ADMIN,
+                sort=2
             )
         )
         
@@ -44,7 +46,8 @@ class UserPlugin(PluginInterface):
                 description="删除普通用户",
                 handler=self.remove_user_command,
                 category=CommandCategory.USER,
-                required_role=UserRole.ADMIN
+                required_role=UserRole.ADMIN,
+                sort=3
             )
         )
     

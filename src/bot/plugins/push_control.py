@@ -21,7 +21,8 @@ class PushControlPlugin(PluginInterface):
                 description="查看推送系统状态",
                 handler=self.push_status_command,
                 category=CommandCategory.PUSH,
-                required_role=UserRole.ADMIN
+                required_role=UserRole.ADMIN,
+                sort=1
             )
         )
         
@@ -31,7 +32,8 @@ class PushControlPlugin(PluginInterface):
                 description="列出所有推送插件",
                 handler=self.push_list_command,
                 category=CommandCategory.PUSH,
-                required_role=UserRole.ADMIN
+                required_role=UserRole.ADMIN,
+                sort=2
             )
         )
         
@@ -41,7 +43,8 @@ class PushControlPlugin(PluginInterface):
                 description="手动触发推送插件",
                 handler=self.push_trigger_command,
                 category=CommandCategory.PUSH,
-                required_role=UserRole.ADMIN
+                required_role=UserRole.ADMIN,
+                sort=3
             )
         )
         
@@ -51,7 +54,8 @@ class PushControlPlugin(PluginInterface):
                 description="手动触发所有推送插件",
                 handler=self.push_trigger_all_command,
                 category=CommandCategory.PUSH,
-                required_role=UserRole.ADMIN
+                required_role=UserRole.ADMIN,
+                sort=4
             )
         )
     

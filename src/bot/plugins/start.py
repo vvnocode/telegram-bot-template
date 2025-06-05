@@ -21,7 +21,8 @@ class StartPlugin(PluginInterface):
                 description="开始使用机器人",
                 handler=self.start_command,
                 category=CommandCategory.MAIN,
-                required_role=UserRole.USER
+                required_role=UserRole.USER,
+                sort=1
             )
         )
     

@@ -37,7 +37,8 @@ class IPPlugin(PluginInterface):
                 description="查看当前IP地址",
                 handler=self.check_ip_command,
                 category=CommandCategory.TOOLS,
-                required_role=UserRole.USER
+                required_role=UserRole.USER,
+                sort=1
             )
         )
         
@@ -47,7 +48,8 @@ class IPPlugin(PluginInterface):
                 description="更换IP地址",
                 handler=self.change_ip_command,
                 category=CommandCategory.TOOLS,
-                required_role=UserRole.USER
+                required_role=UserRole.USER,
+                sort=2
             )
         )
         
@@ -57,7 +59,8 @@ class IPPlugin(PluginInterface):
                 description="查看IP更换统计",
                 handler=self.ip_stats_command,
                 category=CommandCategory.TOOLS,
-                required_role=UserRole.USER
+                required_role=UserRole.USER,
+                sort=3
             )
         )
     

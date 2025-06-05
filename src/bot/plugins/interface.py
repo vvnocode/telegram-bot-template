@@ -16,10 +16,9 @@ class CommandCategory(Enum):
     MENU = "菜单管理" 
     USER = "用户管理"
     SYSTEM = "系统管理"
-    TOOLS = "实用工具"
     STATS = "统计分析"
     PUSH = "推送管理"
-
+    TOOLS = "实用工具"
 
 @dataclass
 class CommandInfo:
@@ -30,6 +29,7 @@ class CommandInfo:
     category: CommandCategory = CommandCategory.MAIN  # 命令分类
     required_role: UserRole = UserRole.USER  # 所需权限
     is_visible: bool = True             # 是否在菜单中可见
+    sort: int = 999                     # 排序权重，数字越小越靠前
     
     # 运行时数据，不在配置中加载
     handler_instance: Optional[CommandHandler] = field(default=None, repr=False)

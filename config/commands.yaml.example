@@ -62,4 +62,4 @@ commands:
     description: "将管理员降级为普通用户"
     category: USER
     required_role: ADMIN
-    is_visible: true 
+    is_visible: true
