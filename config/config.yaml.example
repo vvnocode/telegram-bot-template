@@ -19,6 +19,9 @@ change_ip:
   data: {}                    # 请求数据，例如: {"action": "change_ip", "server_id": "123"}
   timeout: 30                 # 请求超时时间（秒）
   notify_user: false   # 是否通知用户。因为同的接口，不同的返回值，所以用户决定是否通知用户结果。默认不通知。
+  # 次数限制配置
+  user_daily_limit: 2     # 普通用户每日更换IP次数限制，默认2次，管理员不限制
+  total_daily_limit: 5    # 每日更换IP总次数限制，0表示不限制
 
 # # 插件配置
 # plugins:
