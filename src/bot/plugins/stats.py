@@ -263,7 +263,7 @@ class StatsPlugin(PluginInterface):
         
         # 构建消息
         user_display_name = await UserUtils.get_user_display_name(user_id, context)
-        message = f"📊 *{user_display_name} 的使用统计*\n\n"
+        message = f"📊 {user_display_name} 的使用统计\n\n"
         
         # 今日统计
         if user_today_stats:
@@ -325,7 +325,7 @@ class StatsPlugin(PluginInterface):
         for user_id in admin_ids:
             if user_id in user_menu_stats:
                 user_display_name = await UserUtils.get_user_display_name(user_id, context)
-                message += f"*👑 {user_display_name}:*\n"
+                message += f"👑 {user_display_name}:\n"
                 
                 # 按使用次数对命令排序
                 sorted_commands = sorted(user_menu_stats[user_id].items(), key=lambda x: x[1], reverse=True)
@@ -341,7 +341,7 @@ class StatsPlugin(PluginInterface):
         for user_id in normal_user_ids:
             if user_id in user_menu_stats:
                 user_display_name = await UserUtils.get_user_display_name(user_id, context)
-                message += f"*👤 {user_display_name}:*\n"
+                message += f"👤 {user_display_name}:\n"
                 
                 # 按使用次数对命令排序
                 sorted_commands = sorted(user_menu_stats[user_id].items(), key=lambda x: x[1], reverse=True)
@@ -395,7 +395,7 @@ class StatsPlugin(PluginInterface):
         for user_id in admin_ids:
             if user_id in user_menu_stats:
                 user_display_name = await UserUtils.get_user_display_name(user_id, context)
-                message += f"*👑 {user_display_name}:*\n"
+                message += f"👑 {user_display_name}:\n"
                 
                 # 按使用次数对命令排序
                 sorted_commands = sorted(user_menu_stats[user_id].items(), key=lambda x: x[1], reverse=True)
@@ -411,7 +411,7 @@ class StatsPlugin(PluginInterface):
         for user_id in normal_user_ids:
             if user_id in user_menu_stats:
                 user_display_name = await UserUtils.get_user_display_name(user_id, context)
-                message += f"*👤 {user_display_name}:*\n"
+                message += f"👤 {user_display_name}:\n"
                 
                 # 按使用次数对命令排序
                 sorted_commands = sorted(user_menu_stats[user_id].items(), key=lambda x: x[1], reverse=True)
