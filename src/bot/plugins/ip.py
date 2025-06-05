@@ -12,6 +12,7 @@ from src.bot.plugins.interface import PluginInterface, CommandInfo, CommandCateg
 from src.logger import logger
 from src.utils.ip_utils import IPUtils
 from src.utils.http_utils import HTTPUtils
+from src.utils.user_utils import UserUtils
 from src.config import config
 
 
@@ -252,7 +253,7 @@ class IPPlugin(PluginInterface):
         
         return users_stats
 
-    def _get_stats_message(self, user_id: int, user_role: UserRole, user_limit: int, total_limit: int) -> str:
+    async def _get_stats_message(self, user_id: int, user_role: UserRole, user_limit: int, total_limit: int, context: ContextTypes.DEFAULT_TYPE = None) -> str:
         """获取统计信息消息
         
         Args:
@@ -260,6 +261,7 @@ class IPPlugin(PluginInterface):
             user_role: 用户角色
             user_limit: 普通用户每日限制次数
             total_limit: 每日总限制次数
+            context: Telegram上下文对象（用于获取用户昵称，可选）
             
         Returns:
             str: 统计信息消息
@@ -299,14 +301,17 @@ class IPPlugin(PluginInterface):
                 user_stats = []
                 
                 for user_id_str, count in sorted(all_users_stats.items(), key=lambda x: int(x[1]), reverse=True):
+                    # 获取用户显示名称（优先从缓存获取，必要时尝试API）
+                    user_display_name = await UserUtils.get_user_display_name(int(user_id_str), context)
+                    
                     if user_id_str in admin_ids:
-                        admin_stats.append(f"🔑 `{user_id_str}`: {count}次 (管理员)")
+                        admin_stats.append(f"🔑 {user_display_name}: {count}次 (管理员)")
                     elif user_id_str in user_ids:
                         remaining = max(0, user_limit - count)
-                        admin_stats.append(f"👤 `{user_id_str}`: {count}/{user_limit}次 (剩余: {remaining})")
+                        user_stats.append(f"👤 {user_display_name}: {count}/{user_limit}次 (剩余: {remaining})")
                     else:
                         # 未知用户（可能已被移除）
-                        user_stats.append(f"❓ `{user_id_str}`: {count}次 (未知用户)")
+                        user_stats.append(f"❓ {user_display_name}: {count}次 (未知用户)")
                 
                 # 显示管理员统计
                 if admin_stats:
@@ -480,6 +485,6 @@ class IPPlugin(PluginInterface):
         user_role = user_manager.get_user_role(user_id)
         
         # 生成统计消息
-        stats_msg = self._get_stats_message(user_id, user_role, user_limit, total_limit)
+        stats_msg = await self._get_stats_message(user_id, user_role, user_limit, total_limit, context)
         
         await update.message.reply_text(stats_msg, parse_mode='Markdown') 

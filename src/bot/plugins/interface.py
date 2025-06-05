@@ -8,6 +8,7 @@ from telegram import Update, BotCommand
 from telegram.ext import ContextTypes, CommandHandler, Application
 
 from src.auth import UserManager, UserRole
+from src.utils.user_utils import UserUtils
 
 
 class CommandCategory(Enum):
@@ -110,6 +111,9 @@ class PluginInterface(ABC):
         """
         async def handler_wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE):
             """命令处理函数包装器"""
+            # 更新用户缓存信息
+            UserUtils.update_user_cache_from_update(update)
+            
             # 检查用户权限
             if not await self.user_manager.check_permission(update, command_info.required_role):
                 role_name = command_info.required_role.name.lower()
