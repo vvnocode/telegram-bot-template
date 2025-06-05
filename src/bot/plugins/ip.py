@@ -117,7 +117,7 @@ class IPPlugin(PluginInterface):
             logger.info(f"更换IP接口调用成功: {response}")
 
             # 下发更新IP成功
-            await processing_msg.edit_text(f"✅ **IP更换命令下发成功**\n\n请等待执行结果", parse_mode='Markdown')
+            await processing_msg.edit_text(f"✅ **IP更换命令下发成功**\n\n请等待执行结果，\n\n如果长时间没有返回执行结果，请再次尝试或者联系管理员！", parse_mode='Markdown')
 
             # 是否通知用户。因为同的接口，不同的返回值，所以用户决定是否通知用户结果。默认不通知。
             notify_user = change_ip_config.get('notify_user', False)
