@@ -1,9 +1,8 @@
 """IP工具类"""
-import urllib.request
-import urllib.error
 from typing import Optional
 from src.config import config
 from src.logger import logger
+from src.utils.http_utils import HTTPUtils
 
 
 class IPUtils:
@@ -16,7 +15,6 @@ class IPUtils:
         Returns:
             Optional[str]: 当前IP地址，获取失败时返回None
         """
-        # 使用Python内置urllib（避免curl兼容性问题）
         try:
             api_urls = config.get('get_ip_urls', [
                 'https://api.ipify.org'
@@ -24,14 +22,25 @@ class IPUtils:
             
             for url in api_urls:
                 try:
-                    with urllib.request.urlopen(url, timeout=5) as response:
-                        if response.status == 200:
-                            ip = response.read().decode('utf-8').strip()
-                            if ip and IPUtils._is_valid_ip(ip):
-                                logger.debug(f"IP工具: 成功获取IP {ip} (来源: {url})")
-                                return ip
+                    # 使用 HTTPUtils 发送请求
+                    success, response = HTTPUtils.make_request(
+                        url=url,
+                        method="GET",
+                        timeout=5
+                    )
+                    
+                    if success:
+                        ip = response.strip()
+                        if ip and IPUtils._is_valid_ip(ip):
+                            logger.debug(f"IP工具: 成功获取IP {ip} (来源: {url})")
+                            return ip
+                        else:
+                            logger.debug(f"IP工具: 获取到无效IP格式 {ip} (来源: {url})")
+                    else:
+                        logger.debug(f"IP工具: 请求失败 {url}, 错误: {response}")
+                    
                 except Exception as e:
-                    logger.debug(f"IP工具: 请求失败 {url}, 错误: {str(e)}")
+                    logger.debug(f"IP工具: 请求异常 {url}, 错误: {str(e)}")
                     continue
                     
         except Exception as e:

@@ -11,6 +11,14 @@ get_ip_urls:
   - 'https://api-ipv4.ip.sb/ip'
   - 'https://ipinfo.io/ip'
 
+# 更换IP接口配置（可选，如不配置则无法使用更换IP功能）
+change_ip:
+  url: ""                     # 更换IP的接口URL，必填
+  method: "GET"              # HTTP方法，支持GET/POST/PUT/DELETE，默认GET
+  headers: {}                 # 请求头，例如: {"Authorization": "Bearer your_token", "Content-Type": "application/json"}
+  data: {}                    # 请求数据，例如: {"action": "change_ip", "server_id": "123"}
+  timeout: 30                 # 请求超时时间（秒）
+
 # # 插件配置
 # plugins:
   # 启用的插件列表，如果为空，则加载所有未被禁用的插件
