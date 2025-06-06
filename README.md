@@ -1,240 +1,230 @@
-# telegram-bot-template
-一个功能完善的Telegram机器人模板。集成actions自动构建，一键安装脚本，插件式命令系统，用户权限管理。
+# Telegram Bot Template
 
-## 功能特点
+A full-featured Telegram bot template with GitHub Actions integration, one-click installation script, plugin-based command system, user permission management, and proactive push notification system.
 
-- 📦 **插件式命令系统** - 轻松添加新命令，无需修改核心代码
-- 👤 **用户权限管理** - 管理员和普通用户权限分离
-- 🔄 **自动注册命令** - 符合命名规范的命令自动被发现和注册
-- 📋 **命令菜单管理** - 可查看所有可用命令及其权限
-- 👑 **用户管理功能** - 管理员可添加/删除普通用户和其他管理员
-- 🔌 **动态插件加载** - 支持从内部和外部目录加载插件
-- ⚙️ **配置文件支持** - 通过YAML配置文件控制插件的启用与禁用
-- 🖥️ **系统状态监控** - 查看机器人运行状态、系统资源使用情况
-- 📡 **主动推送系统** - 插件式推送框架，支持IP监控等自动通知功能
-- 🔧 **简单易用的API** - 清晰的接口设计，便于扩展
+🇺🇸 English | [🇨🇳 中文](README_ZH.md)
 
-## 使用
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.8+](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![Telegram Bot API](https://img.shields.io/badge/Telegram%20Bot%20API-20.7-blue.svg)](https://python-telegram-bot.org/)
 
-### 使用install.sh安装(推荐)
+## ✨ Features
 
-1. 运行一键安装脚本
+- 📦 **Plugin-based Command System** - Easily add new commands without modifying core code
+- 👤 **User Permission Management** - Separate admin and regular user permissions with flexible user management
+- 🔄 **Auto Command Registration** - Commands following naming conventions are automatically discovered and registered
+- 📋 **Command Menu Management** - View all available commands and their permissions with category display
+- 👑 **User Management Features** - Admins can add/remove regular users and other administrators
+- 🔌 **Dynamic Plugin Loading** - Support loading plugins from internal and external directories with hot-swapping
+- ⚙️ **Configuration File Support** - Control plugin enable/disable through YAML configuration files
+- 🖥️ **System Status Monitoring** - View bot running status and system resource usage
+- 📡 **Proactive Push System** - Plugin-based push framework supporting IP monitoring and other automatic notifications
+- 📊 **Statistical Analysis System** - Complete command usage statistics with time and user analysis
+- 🌐 **IP Management Tools** - Built-in IP viewing and management functionality
+- 🔧 **Simple and Easy-to-use API** - Clear interface design for easy extension development
+- 🚀 **One-click Deployment** - Support automated deployment and service management
+- 📋 **Comprehensive Logging System** - Structured logging using loguru
+- 🏗️ **GitHub Actions Integration** - Automated building and publishing
+
+## 🚀 Quick Start
+
+### Method 1: One-click Installation Script (Recommended)
+
 ```bash
+# Install
 bash <(curl -L -s https://raw.githubusercontent.com/vvnocode/telegram-bot-template/main/install.sh)
-```
-2. 根据提示输入Telegram Bot Token和Chat ID
 
-### 手动修改配置文件
-
-安装完成后可以手动修改配置文件，修改完成后需要重启服务：`systemctl restart telegram-bot-template`
-
-配置文件位于 `/opt/telegram-bot-template/config.yaml`，示例：
-```yaml
-# Telegram配置
-telegram_bot_token: ""               # 你的Telegram Bot Token
-telegram_admin_id: ""  # 管理员用户ID, 多个用户ID用逗号分隔
-telegram_user_id: ""     # 授权的普通用户ID, 多个用户ID用逗号分隔
-
-# 插件配置
-plugins:
-  # 启用的插件列表，如果为空，则加载所有未被禁用的插件
-  enabled: []
-  
-  # 禁用的插件列表，这些插件将不会被加载
-  disabled: ["ip"]  # 禁用示例
+# Uninstall
+bash <(curl -L -s https://raw.githubusercontent.com/vvnocode/telegram-bot-template/main/install.sh) uninstall
 ```
 
-### Telegram Bot 命令
+The installation script will automatically:
+- Download the latest pre-compiled program
+- Create system service
+- Set up directory structure
+- Configure basic parameters
 
-#### 基础命令
-- `/start` - 机器人使用入口
-- `/help` - 显示帮助信息
-- `/menu` - 查看所有可用命令及权限
+### Method 2: Manual Installation
 
-#### 用户管理命令 (管理员权限)
-- `/users` - 查看所有用户列表
-- `/adduser` - 添加普通用户
-- `/deluser` - 删除普通用户
-
-#### 系统命令
-- `/status` - 查看系统状态(需管理员权限)
-- `/get_ip` - 查看当前IP地址
-
-#### 统计命令 (管理员权限)
-- `/stats_total` - 显示所有命令的总体使用统计
-- `/stats_today` - 显示所有命令的今日使用统计
-- `/stats_users_total` - 显示所有用户的各菜单使用详情统计
-- `/stats_users_today` - 显示所有用户的今日各菜单使用详情
-- `/stats_user` - 显示指定用户的统计信息
-
-#### 推送系统命令 (管理员权限)
-- `/push_status` - 查看推送系统状态
-- `/push_list` - 列出所有推送插件
-- `/push_trigger <插件名>` - 手动触发指定推送插件
-- `/push_trigger_all` - 手动触发所有推送插件
-
-### 服务管理
-
+1. **Clone the project**
 ```bash
-# 启动服务
-systemctl start telegram-bot-template
-# 停止服务
-systemctl stop telegram-bot-template
-# 重启服务
-systemctl restart telegram-bot-template
-# 查看服务状态
-systemctl status telegram-bot-template
-```
-
-## 开发
-
-1. 克隆项目:
-```shell
 git clone https://github.com/vvnocode/telegram-bot-template.git
 cd telegram-bot-template
 ```
 
-2. 创建并激活虚拟环境:
-```shell
+2. **Create virtual environment**
+```bash
 python3 -m venv venv
 source venv/bin/activate  # Linux/Mac
-# 或
+# or
 .\venv\Scripts\activate  # Windows
 ```
 
-3. 安装依赖:
-```shell
+3. **Install dependencies**
+```bash
 pip install -r requirements.txt
 ```
 
-4. 本地开发运行:
-```shell
+4. **Configure the bot**
+```bash
+cp config/config.yaml.example config.yaml
+# Edit config.yaml to fill in your Bot Token and user IDs
+```
+
+5. **Run the bot**
+```bash
 python src/main.py
 ```
 
-## 项目结构
+## ⚙️ Configuration
 
-```
-telegram-bot-template/
-├── config/                   # 配置目录
-│   ├── config.yaml           # 主配置文件
-│   └── commands.yaml         # 命令配置文件
-├── src/                      # 源代码目录
-│   ├── __init__.py           # 初始化文件
-│   ├── main.py               # 程序入口点
-│   ├── config.py             # 配置加载
-│   ├── logger.py             # 日志配置
-│   ├── bot/                  # 机器人核心功能
-│   │   ├── __init__.py
-│   │   ├── core.py           # Bot核心类
-│   │   ├── plugins/          # 插件系统
-│   │   │   ├── __init__.py
-│   │   │   ├── interface.py  # 插件接口定义
-│   │   │   ├── loader.py     # 插件加载器
-│   │   │   ├── menu.py       # 菜单插件
-│   │   │   ├── start.py      # 启动插件
-│   │   │   ├── user.py       # 用户管理插件
-│   │   │   ├── stats.py      # 统计插件
-│   │   │   ├── ip.py         # IP工具插件
-│   │   │   ├── push_control.py # 推送控制插件
-│   │   │   └── README.md     # 插件开发文档
-│   │   └── utils/            # 机器人工具函数
-│   │       ├── __init__.py
-│   │       └── message_helper.py # 消息处理助手
-│   ├── push/                 # 推送系统
-│   │   ├── __init__.py
-│   │   ├── interface.py      # 推送插件接口
-│   │   ├── manager.py        # 推送管理器
-│   │   ├── plugins/          # 推送插件目录
-│   │   │   ├── __init__.py
-│   │   │   └── ip_monitor.py # IP监控推送插件
-│   │   └── README.md         # 推送系统文档
-│   ├── auth/                 # 用户认证模块
-│   │   ├── __init__.py
-│   │   ├── permissions.py    # 权限定义
-│   │   └── user.py           # 用户管理
-│   └── utils/                # 工具函数
-│       ├── __init__.py
-│       └── stats.py          # 统计管理
-└── requirements.txt          # 依赖列表
-```
-
-## 用户权限管理
-
-本机器人实现了完善的用户权限管理机制，分为两种角色：
-
-1. **普通用户**：可以访问基本命令，如`/start`、`/help`和`/menu`
-2. **管理员**：除了普通用户的权限外，还可以访问管理命令，如`/status`和用户管理命令
-
-### 添加或删除用户
-
-管理员可以使用以下命令管理用户：
-
-- `/users` - 查看所有用户和管理员列表
-- `/adduser <用户ID>` - 添加普通用户（也可转发用户消息后回复此命令）
-- `/deluser <用户ID>` - 删除普通用户
-
-### 配置权限
-
-在配置文件`config.yaml`中设置用户ID：
+### Main Configuration File (config.yaml)
 
 ```yaml
-# 普通用户ID列表，用逗号分隔
-telegram_user_id: "USER_ID_1,USER_ID_2"
+# Telegram configuration
+telegram_bot_token: "YOUR_BOT_TOKEN"     # Bot Token
+telegram_admin_id: "ADMIN_ID1,ADMIN_ID2" # Admin ID list
+telegram_user_id: "USER_ID1,USER_ID2"    # Regular user ID list
 
-# 管理员ID列表，用逗号分隔
-telegram_admin_id: "ADMIN_ID_1,ADMIN_ID_2"
+# Plugin configuration
+plugins:
+  enabled: []     # Enabled plugin list (empty loads all)
+  disabled: []    # Disabled plugin list
+
+# IP tool configuration
+get_ip_urls:
+  - https://api.ipify.org
+  - https://ipinfo.io/ip
+
+# IP change configuration
+change_ip:
+  url: "https://api.example.com/change-ip"
+  method: "GET"
+  headers: {}
+  data: {}
+  timeout: 30
+  notify_user: false
+  user_daily_limit: 2
+  total_daily_limit: 5
+
+# Push system configuration
+push:
+  enabled: []
+  disabled: []
+  plugins:
+    ip_monitor:
+      frequency: interval
+      interval_seconds: 300
+      target_admin_only: true
 ```
 
-## 插件系统
+### Getting Telegram Configuration
 
-本机器人采用全新的插件系统，支持动态加载内部和外部插件：
+1. **Get Bot Token**
+   - Find [@BotFather](https://t.me/BotFather) on Telegram
+   - Send `/newbot` to create a new bot
+   - Follow prompts to set bot name and username
+   - Get the Token
 
-### 插件加载机制
+2. **Get User ID**
+   - Method 1: Use [@userinfobot](https://t.me/userinfobot)
+   - Method 2: Use [@getmyid_bot](https://t.me/getmyid_bot)
+   - Method 3: Start the bot and send any message, check logs
 
-插件系统支持两种方式加载插件：
+## 🎮 Usage Guide
 
-1. **内置插件**：存放在`src/bot/plugins`目录中的插件，与代码一起打包
-2. **外部插件**：存放在以下位置的`plugins`目录中的插件
-   - 项目根目录下的`plugins`目录
-   - 可执行文件所在目录下的`plugins`目录 (`/opt/telegram-bot-template/plugins`)
-   - 当前工作目录下的`plugins`目录
+### Basic Commands
+- `/start` - Bot entry point, shows welcome message
+- `/menu` - View all available commands and permission requirements
 
-系统会先加载内置插件，然后尝试加载外部插件。如果发现同名插件，将优先使用内置插件。
+### User Management Commands (Admin Only)
+- `/users` - View all users and admin list
+- `/adduser <user_id>` - Add regular user (supports forwarded message reply)
+- `/deluser <user_id>` - Remove regular user
 
-### 插件配置
+### Utility Tools
+- `/status` - View system status and resource usage (admin only)
+- `/get_ip` - View current server IP address
+- `/change_ip` - Change IP address (if configured)
 
-在`config.yaml`中可以控制插件的加载：
+### Statistical Analysis Commands (Admin Only)
+- `/stats_total` - Show total usage statistics for all commands
+- `/stats_today` - Show today's usage statistics for all commands
+- `/stats_users_total` - Show detailed usage statistics for all users
+- `/stats_users_today` - Show today's usage statistics for all users
+- `/stats_user <user_id>` - Show statistics for specific user
+
+### Push System Commands (Admin Only)
+- `/push_status` - View push system running status
+- `/push_list` - List all push plugins and their status
+- `/push_trigger <plugin_name>` - Manually trigger specific push plugin
+- `/push_trigger_all` - Manually trigger all push plugins
+
+## 🔧 Service Management
+
+### Systemd Service Commands
+```bash
+# Start service
+sudo systemctl start telegram-bot-template
+
+# Stop service
+sudo systemctl stop telegram-bot-template
+
+# Restart service
+sudo systemctl restart telegram-bot-template
+
+# Check service status
+sudo systemctl status telegram-bot-template
+
+# Enable auto-start
+sudo systemctl enable telegram-bot-template
+
+# View service logs
+sudo journalctl -u telegram-bot-template -f
+```
+
+### File Locations
+- **Program file**: `/opt/telegram-bot-template/telegram-bot-template`
+- **Configuration file**: `/opt/telegram-bot-template/config.yaml`
+- **Log file**: `/opt/telegram-bot-template/logs/bot.log`
+- **Data directory**: `/opt/telegram-bot-template/data/`
+- **External plugins**: `/opt/telegram-bot-template/plugins/`
+
+## 🧩 Plugin System
+
+The bot uses an advanced plugin system architecture supporting dynamic loading and management:
+
+### Plugin Loading Mechanism
+
+**Supported Plugin Locations**:
+1. **Built-in plugins**: `src/bot/plugins/` - Core plugins packaged with code
+2. **External plugins**: `plugins/` folders in the following directories
+   - Project root: `./plugins/`
+   - Executable directory: `/opt/telegram-bot-template/plugins/`
+   - Current working directory: `$(pwd)/plugins/`
+
+**Loading Priority**:
+1. Disabled list (`disabled`) has highest priority
+2. Enabled list (`enabled`) second, only loads specified plugins
+3. If no configuration, loads all available plugins
+4. Same-name plugins prioritize built-in versions
+
+### Plugin Configuration Management
 
 ```yaml
 plugins:
-  # 启用的插件列表，如果为空，则加载所有未被禁用的插件
-  enabled: ["menu", "start"]  # 只启用这些插件
+  # Only enable specified plugins
+  enabled: ["menu", "start", "user"]
   
-  # 禁用的插件列表，这些插件将不会被加载
-  disabled: ["ip"]  # 禁用IP插件
+  # Disable specific plugins
+  disabled: ["ip", "stats"]
 ```
 
-加载优先级规则：
-1. 禁用列表（disabled）优先级最高，在此列表中的插件不会被加载
-2. 启用列表（enabled）优先级次之，仅加载此列表中的插件
-3. 若未配置上述两个列表，则加载所有可用插件
+### Developing Custom Plugins
 
-### 添加新插件
+#### 1. Create Plugin File
 
-#### 内置插件
-
-1. 在`src/bot/plugins`目录下创建新的Python文件
-2. 创建一个继承自`PluginInterface`的插件类
-3. 实现必要的方法，特别是`register_commands`
-
-#### 外部插件
-
-1. 在`/opt/telegram-bot-template/plugins`目录下创建新的Python文件
-2. 创建一个继承自`PluginInterface`的插件类
-3. 实现必要的方法，特别是`register_commands`
-
-#### 插件类模板
+Create `my_plugin.py` in `/opt/telegram-bot-template/plugins/`:
 
 ```python
 from telegram import Update
@@ -244,197 +234,479 @@ from src.auth import UserManager, UserRole
 from src.bot.plugins.interface import PluginInterface, CommandInfo, CommandCategory
 from src.logger import logger
 
-class ExamplePlugin(PluginInterface):
-    """示例插件"""
-    name = "example"  # 插件名称（唯一标识符）
-    description = "示例插件"  # 插件描述
-    version = "1.0.0"  # 插件版本
+class MyPlugin(PluginInterface):
+    """Custom plugin example"""
+    name = "my_plugin"
+    description = "My custom plugin"
+    version = "1.0.0"
     
     def register_commands(self) -> None:
-        """注册命令到插件"""
+        """Register commands"""
         self.register_command(
             CommandInfo(
-                command="example",  # 命令名称（不含/）
-                description="示例命令",  # 命令描述
-                handler=self.example_command,  # 命令处理函数
-                category=CommandCategory.TOOLS,  # 命令分类
-                required_role=UserRole.USER  # 所需权限级别
+                command="hello",
+                description="Greeting command",
+                handler=self.hello_command,
+                category=CommandCategory.TOOLS,
+                required_role=UserRole.USER
             )
         )
     
-    async def example_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE, user_manager: UserManager):
-        """示例命令处理函数"""
-        await update.message.reply_text("这是一个示例命令")
+    async def hello_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE, user_manager: UserManager):
+        """Handle greeting command"""
+        user_id = update.effective_user.id
+        user_info = user_manager.get_user_info(user_id)
+        await update.message.reply_text(f"Hello, {user_info.get('name', 'User')}!")
 ```
 
-### 命令分类
+#### 2. Command Categories
 
-命令可以按以下分类组织：
+Plugins support the following command categories:
 
-- `CommandCategory.MAIN`: 主菜单
-- `CommandCategory.MENU`: 菜单管理
-- `CommandCategory.USER`: 用户管理
-- `CommandCategory.SYSTEM`: 系统管理
-- `CommandCategory.TOOLS`: 实用工具
-- `CommandCategory.STATS`: 统计分析
+| Category | Description | Example Commands |
+|----------|-------------|------------------|
+| `MAIN` | Main functions | `/start`, `/help` |
+| `MENU` | Menu management | `/menu` |
+| `USER` | User management | `/users`, `/adduser` |
+| `SYSTEM` | System management | `/status` |
+| `TOOLS` | Utility tools | `/get_ip` |
+| `STATS` | Statistical analysis | `/stats_total` |
 
-## 推送系统
+#### 3. Permission Levels
 
-本机器人集成了强大的推送系统，支持主动向用户发送各种类型的通知和监控信息。
+- `UserRole.USER` - Regular user permissions
+- `UserRole.ADMIN` - Administrator permissions
 
-### 主要特性
+### Built-in Plugin Overview
 
-- 🔧 **插件式架构**: 支持自定义推送插件
-- 🎯 **权限控制**: 支持管理员和普通用户权限区分
-- ⏰ **多种推送频率**: 支持事件驱动、定时间隔、一次性等模式
-- 👥 **灵活的目标管理**: 可配置推送给管理员、所有用户或自定义用户列表
-- 🔄 **动态管理**: 支持运行时启动、停止和手动触发
+| Plugin Name | Function | Commands |
+|-------------|----------|----------|
+| `start` | Startup and help | `/start`, `/help` |
+| `menu` | Command menu | `/menu` |
+| `user` | User management | `/users`, `/adduser`, `/deluser` |
+| `stats` | Statistical analysis | `/stats_*` series commands |
+| `ip` | IP management | `/get_ip`, `/change_ip` |
+| `push_control` | Push control | `/push_*` series commands |
 
-### 推送频率类型
+## 📡 Push System
 
-- **EVENT**: 事件驱动，需要外部调用trigger_check()
-- **INTERVAL**: 定时间隔，按设定的秒数间隔执行
-- **ONCE**: 一次性执行，启动后执行一次
-- **CRON**: 定时任务（暂未实现）
+Powerful proactive push system supporting multiple push strategies and custom plugins:
 
-### 配置推送系统
+### Push Frequency Types
 
-在 `config.yaml` 中配置推送系统：
+| Type | Description | Use Case |
+|------|-------------|----------|
+| `EVENT` | Event-driven | External trigger check |
+| `INTERVAL` | Timed interval | Periodic monitoring |
+| `ONCE` | One-time execution | Startup notification |
+| `CRON` | Scheduled task | Specific time execution (to be implemented) |
+
+### Push Target Configuration
 
 ```yaml
-# 推送系统配置
 push:
-  # 启用的推送插件列表（为空则加载所有）
-  enabled: []
-  # 禁用的推送插件列表
-  disabled: []
-  # 插件特定配置
+  plugins:
+    my_push:
+      target_admin_only: true    # Push to admins only
+      custom_targets: []         # Custom target user list
+```
+
+### Built-in Push Plugins
+
+#### IP Monitor Plugin (ip_monitor)
+
+Monitor server IP address changes:
+
+```yaml
+push:
   plugins:
     ip_monitor:
       enabled: true
-      frequency: interval  # event, interval, once, cron
-      interval_seconds: 300  # 5分钟检查一次
+      frequency: interval
+      interval_seconds: 300      # Check every 5 minutes
       target_admin_only: true
-      custom_targets: []  # 自定义目标用户ID列表
 ```
 
-### 内置推送插件
+**Features**:
+- 📍 Real-time IP address change detection
+- 💾 Persistent state to file system
+- 🚀 Push current IP on first startup
+- ✅ IP address format validation
 
-#### IP监控插件 (ip_monitor)
-
-监控服务器IP地址变化，当检测到IP变化时向管理员推送通知。
-
-**功能特性:**
-- 📍 检测IP地址变化
-- 💾 持久化IP状态到文件
-- 🔍 首次启动时发送当前IP信息
-- ✅ IP地址格式验证
-
-**使用示例:**
-```yaml
-plugins:
-  ip_monitor:
-    enabled: true
-    frequency: interval
-    interval_seconds: 300  # 5分钟检查一次
-    target_admin_only: true
-```
-
-### 推送管理命令
-
-管理员可以使用以下命令管理推送系统：
-
-- `/push_status` - 查看推送系统状态
-- `/push_list` - 列出所有推送插件
-- `/push_trigger <插件名>` - 手动触发指定推送插件
-- `/push_trigger_all` - 手动触发所有推送插件
-
-### 开发自定义推送插件
-
-创建自定义推送插件的步骤：
+### Developing Push Plugins
 
 ```python
 from src.push.interface import PushPluginInterface, PushConfig
 from src.auth import UserManager
+from typing import Optional, Any
 
-class MyPushPlugin(PushPluginInterface):
-    name = "my_plugin"
-    description = "我的推送插件"
+class CustomPushPlugin(PushPluginInterface):
+    name = "custom_push"
+    description = "Custom push plugin"
     version = "1.0.0"
     
     def __init__(self, user_manager: UserManager, config: PushConfig = None):
         super().__init__(user_manager, config)
-        # 初始化插件特定的属性
+        # Initialize plugin-specific configuration
     
     async def check_condition(self) -> tuple[bool, Optional[str]]:
-        """检查是否需要推送"""
-        # 实现检查逻辑
-        should_push = False  # 根据条件判断
-        message = None       # 推送消息内容
+        """Check push conditions"""
+        # Implement check logic
+        should_push = self._should_send_notification()
+        message = self.get_message() if should_push else None
         return should_push, message
     
     def get_message(self, data: Any = None) -> str:
-        """生成推送消息"""
-        return "推送消息内容"
+        """Generate push message"""
+        return "Custom push message content"
 ```
 
-将插件文件放在 `src/push/plugins/` 目录下，系统会自动发现并加载。
+## 📊 Project Structure
 
-### 推送目标配置
+```
+telegram-bot-template/
+├── .github/                  # GitHub Actions configuration
+│   └── workflows/
+│       └── build.yml        # Auto-build workflow
+├── config/                  # Configuration templates
+│   ├── config.yaml.example  # Main configuration template
+│   └── commands.yaml.example # Command configuration template
+├── src/                     # Source code directory
+│   ├── main.py             # Program entry point
+│   ├── config.py           # Configuration loading module
+│   ├── logger.py           # Logging configuration module
+│   ├── bot/                # Bot core
+│   │   ├── core.py         # Bot core class
+│   │   ├── plugins/        # Plugin system
+│   │   │   ├── interface.py    # Plugin interface definition
+│   │   │   ├── loader.py       # Plugin loader
+│   │   │   ├── menu.py         # Menu plugin
+│   │   │   ├── start.py        # Startup plugin
+│   │   │   ├── user.py         # User management plugin
+│   │   │   ├── stats.py        # Statistics plugin
+│   │   │   ├── ip.py           # IP tools plugin
+│   │   │   ├── push_control.py # Push control plugin
+│   │   │   └── README.md       # Plugin development docs
+│   │   └── utils/              # Utility functions
+│   │       └── message_helper.py # Message processing helper
+│   ├── push/               # Push system
+│   │   ├── interface.py    # Push interface definition
+│   │   ├── manager.py      # Push manager
+│   │   ├── plugins/        # Push plugins
+│   │   │   └── ip_monitor.py   # IP monitoring plugin
+│   │   └── README.md       # Push system documentation
+│   ├── auth/               # Authentication & authorization
+│   │   ├── permissions.py  # Permission definition
+│   │   └── user.py         # User management
+│   └── utils/              # Common utilities
+│       └── stats.py        # Statistics management
+├── data/                   # Data directory
+│   └── stats/              # Statistics data
+│       └── daily/          # Daily statistics
+├── logs/                   # Log directory
+├── dist/                   # Build output
+├── build/                  # Build temporary files
+├── img/                    # Project screenshots
+├── requirements.txt        # Python dependencies
+├── build.sh               # Build script
+├── install.sh             # Installation script
+├── telegram-bot-template.spec # PyInstaller configuration
+├── config.yaml            # Runtime configuration
+├── .gitignore            # Git ignore rules
+├── LICENSE               # MIT license
+└── README.md             # Project documentation
+```
 
-推送插件支持灵活的目标用户配置：
+## 👥 User Permission Management
 
-1. **仅管理员**: `target_admin_only: true`
-2. **所有用户**: `target_admin_only: false`
-3. **自定义用户**: 通过 `custom_targets` 指定用户ID列表
+### Permission Roles
 
-更多详细信息请参考 [推送系统文档](src/push/README.md)。
+1. **Regular User (USER)**
+   - Access basic commands: `/start`, `/help`, `/menu`
+   - Use utility commands: `/get_ip`
 
-## 自动构建
+2. **Administrator (ADMIN)**
+   - All regular user permissions
+   - User management: add/remove users and admins
+   - System management: view status, statistics
+   - Push control: manage push system
 
-1. 支持打tag后，使用actions自动构建。
-2. 未使用全局Token，需要自己创建 [tokens](https://github.com/settings/tokens)。
-3. 需要配置MY_GITHUB_TOKEN
-    路径：Project - Settins -> Security -> Secrets and variables -> Repository secrets
-    参数：MY_GITHUB_TOKEN
-    值为步骤2的token
+### User Management Operations
 
-## 常见问题
+```bash
+# View user list
+/users
 
-### 1. 如何获取 Telegram Bot Token？
-1. 在 Telegram 中找到 @BotFather
-2. 发送 `/newbot` 命令
-3. 按照提示设置 bot 名称
-4. 获取 bot token
+# Add regular user
+/adduser 123456789
+# or forward user message then reply
+/adduser
 
-### 2. 如何获取 Chat ID？
-1. 在 Telegram 中找到 @userinfobot
-2. 发送任意消息
-3. 机器人会返回你的 Chat ID
+# Remove regular user
+/deluser 123456789
 
-### 3. 如何添加用户？
-有两种方式：
-1. 通过用户ID添加: `/adduser <用户ID>`
+# Add admin
+/addadmin 123456789
 
-### 4. 如何开发新的插件？
-1. 在`/opt/telegram-bot-template/plugins`目录下创建新的Python文件
-2. 参考插件类模板创建自己的插件
-3. 实现`register_commands`方法注册命令
-4. 重启机器人：`systemctl restart telegram-bot-template`
+# Remove admin
+/deladmin 123456789
+```
 
-## 效果展示
+### Permission Configuration
 
-### 普通用户界面
-![普通用户界面](img/user.png)
+Configure in `config.yaml`:
 
-### 管理员界面
-![管理员界面](img/admin.png)
+```yaml
+# Regular user list
+telegram_user_id: "123456789,987654321"
 
-### 菜单管理
-![](img/menu.jpg)
+# Admin list
+telegram_admin_id: "111111111,222222222"
+```
 
-## 贡献指南
-欢迎提交 Pull Request 或 Issue 来帮助改进项目。
+## 📈 Statistics System
 
-## 许可证
-MIT License
+Comprehensive usage statistics and analysis functionality:
+
+### Statistics Features
+
+- **Command Statistics**: Record usage count and time for each command
+- **User Statistics**: Analyze user activity and usage patterns
+- **Time Statistics**: Support daily and total statistics
+- **Data Persistence**: Save statistics data to file system
+
+### Statistics Commands
+
+| Command | Function | Permission |
+|---------|----------|------------|
+| `/stats_total` | Overall command statistics | Admin |
+| `/stats_today` | Today's command statistics | Admin |
+| `/stats_users_total` | User usage statistics | Admin |
+| `/stats_users_today` | Today's user statistics | Admin |
+| `/stats_user <ID>` | Specific user statistics | Admin |
+
+### Data Storage
+
+```
+data/
+└── stats/
+    ├── total.json           # Overall statistics
+    ├── users.json          # User statistics
+    └── daily/
+        └── YYYY-MM-DD.json # Daily statistics
+```
+
+## 🏗️ Development & Build
+
+### Development Environment Setup
+
+1. **Clone repository**
+```bash
+git clone https://github.com/vvnocode/telegram-bot-template.git
+cd telegram-bot-template
+```
+
+2. **Set up virtual environment**
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+3. **Configure development environment**
+```bash
+cp config/config.yaml.example config.yaml
+# Edit config.yaml to configure development parameters
+```
+
+4. **Run development server**
+```bash
+python src/main.py
+```
+
+### Dependencies Description
+
+| Package | Version | Purpose |
+|---------|---------|---------|
+| `python-telegram-bot` | 20.7 | Telegram Bot API |
+| `PyYAML` | ≥6.0 | YAML configuration file parsing |
+| `loguru` | ~0.7.2 | Structured logging |
+| `psutil` | ≥5.9.0 | System information retrieval |
+| `requests` | ≥2.31.0 | HTTP request handling |
+
+### Build and Package
+
+```bash
+# Local build
+bash build.sh
+
+# Build output location
+ls dist/telegram-bot-template
+```
+
+### GitHub Actions Auto-build
+
+The project integrates GitHub Actions supporting:
+
+- **Auto-build**: Automatically build when pushing tags
+- **Multi-platform support**: Linux x64 build
+- **Auto-release**: Automatically create Release after build completion
+
+**Configuration Steps**:
+1. Create [Personal Access Token](https://github.com/settings/tokens)
+2. Add `MY_GITHUB_TOKEN` secret in repository settings
+3. Push tag to trigger build: `git tag v1.0.0 && git push origin v1.0.0`
+
+## 🔧 FAQ
+
+### Installation and Configuration Issues
+
+**Q: How to get Telegram Bot Token?**
+A: 
+1. Find [@BotFather](https://t.me/BotFather) on Telegram
+2. Send `/newbot` to create a bot
+3. Follow prompts to set name and username
+4. Copy the returned Token
+
+**Q: How to get User ID?**
+A:
+- Use [@userinfobot](https://t.me/userinfobot)
+- Use [@getmyid_bot](https://t.me/getmyid_bot)  
+- Start the bot and send a message, check log output
+
+**Q: What if service fails to start?**
+A:
+```bash
+# Check service status
+sudo systemctl status telegram-bot-template
+
+# View detailed logs
+sudo journalctl -u telegram-bot-template -f
+
+# Check configuration file
+cat /opt/telegram-bot-template/config.yaml
+```
+
+### Permissions and User Management
+
+**Q: How to reset admin permissions?**
+A: Edit configuration file directly:
+```bash
+sudo nano /opt/telegram-bot-template/config.yaml
+# Modify telegram_admin_id field
+sudo systemctl restart telegram-bot-template
+```
+
+**Q: What if user addition fails?**
+A: Ensure:
+- User ID format is correct (numbers only)
+- Bot has permission to send messages to the user
+- User has previously interacted with the bot
+
+### Plugin Development Issues
+
+**Q: Custom plugin not working?**
+A: Check:
+- Plugin file is in correct location
+- Class name matches file name
+- Inherits from `PluginInterface`
+- Implements `register_commands` method
+- Not disabled in configuration file
+
+**Q: How to debug plugins?**
+A: 
+```bash
+# View plugin loading logs
+sudo journalctl -u telegram-bot-template | grep -i plugin
+
+# Enable debug mode (in config.yaml)
+log_level: DEBUG
+```
+
+### Performance and Stability
+
+**Q: What if bot responds slowly?**
+A:
+- Check system resource usage
+- Optimize time-consuming operations in plugin code
+- Consider adding asynchronous processing
+- Check network connection quality
+
+**Q: How to backup data?**
+A:
+```bash
+# Backup entire application directory
+sudo tar -czf telegram-bot-backup.tar.gz /opt/telegram-bot-template
+
+# Backup configuration and data only
+sudo tar -czf config-data-backup.tar.gz \
+  /opt/telegram-bot-template/config.yaml \
+  /opt/telegram-bot-template/data/
+```
+
+## 📸 Screenshots
+
+### Regular User Interface
+![Regular User Interface](img/user.png)
+
+*Regular users can access basic commands, view menus and use utility functions*
+
+### Administrator Interface  
+![Administrator Interface](img/admin.png)
+
+*Administrators have full permissions to manage users, view statistics and control the system*
+
+### Command Menu
+![Command Menu](img/menu.png)
+
+*Clear command categorization and permission display for users to understand available functions*
+
+### IP Change Push Notification
+![Push IP](img/push_ip.png)
+
+*Automatic push notification when IP change is detected*
+
+## 🤝 Contributing
+
+We welcome all forms of contributions!
+
+### How to Participate
+
+1. **Fork the project** to your GitHub account
+2. **Create feature branch**: `git checkout -b feature/amazing-feature`
+3. **Commit changes**: `git commit -m 'Add amazing feature'`
+4. **Push branch**: `git push origin feature/amazing-feature`
+5. **Create Pull Request**
+
+### Contribution Types
+
+- 🐛 **Bug fixes**: Report or fix discovered issues
+- ✨ **New features**: Add useful new functionality
+- 📝 **Documentation improvements**: Enhance documentation and examples
+- 🔧 **Code optimization**: Improve code quality and performance
+- 🧪 **Test additions**: Increase test coverage
+- 🌐 **Internationalization**: Add multi-language support
+
+### Development Standards
+
+- Follow existing code style
+- Add appropriate comments and documentation
+- Ensure backward compatibility
+- Provide test cases
+- Update relevant documentation
+
+## 📄 License
+
+This project is open source under the [MIT License](LICENSE).
+
+## 🔗 Related Links
+
+- **Project Homepage**: https://github.com/vvnocode/telegram-bot-template
+- **Issue Tracker**: https://github.com/vvnocode/telegram-bot-template/issues
+- **Releases**: https://github.com/vvnocode/telegram-bot-template/releases
+- **Telegram Bot API**: https://core.telegram.org/bots/api
+- **Python Telegram Bot**: https://python-telegram-bot.org/
+
+---
+
+If this project helps you, please give it a ⭐ Star for support! 
